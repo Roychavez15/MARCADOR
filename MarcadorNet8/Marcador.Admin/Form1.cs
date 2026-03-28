@@ -43,6 +43,11 @@ public partial class Form1 : Form
         RefrescarComboLayoutPerfiles();
         _layoutEdicion = _db.GetMarcadorLayoutSnapshot();
         propertyGridLayout.SelectedObject = _layoutEdicion;
+        RefrescarDisenadorConDatosDisplay();
+        displayDesignerControl.LayoutChanged += (_, _) => propertyGridLayout.Refresh();
+        propertyGridLayout.PropertyValueChanged += (_, _) => RefrescarDisenadorConDatosDisplay();
+        tabPrincipal.SelectedIndexChanged += (_, _) => { if (tabPrincipal.SelectedTab == tabPageDiseno) RefrescarDisenadorConDatosDisplay(); };
+        BeginInvoke(new Action(RefrescarDisenadorConDatosDisplay));
         ActualizarModo();
         RefrescarUI();
         AplicarIconosBotones();
@@ -233,6 +238,8 @@ public partial class Form1 : Form
 
         var nomLoc = string.IsNullOrWhiteSpace(partido?.NombreLocal) ? "Local" : partido!.NombreLocal.Trim();
         var nomVis = string.IsNullOrWhiteSpace(partido?.NombreVisitante) ? "Visitante" : partido!.NombreVisitante.Trim();
+        if (tabPrincipal.SelectedTab == tabPageDiseno && !displayDesignerControl.IsDragging)
+            RefrescarDisenadorConDatosDisplay();
         lblComboJugadoresLocal.Text = $"{nomLoc} — jugadores:";
         lblComboJugadoresVisitante.Text = $"{nomVis} — jugadores:";
         lblListaGolesLocal.Text = $"Goles — {nomLoc}";
@@ -275,8 +282,8 @@ public partial class Form1 : Form
 
     private void ActualizarEtiquetaCronometro()
     {
-        var c = _db.GetCronometro();
-        var ts = TimeSpan.FromSeconds(c.TotalSeconds);
+        var elapsed = _db.GetCronometroElapsedSeconds();
+        var ts = TimeSpan.FromSeconds(elapsed);
         lblCronometroAdmin.Text = $"{(int)ts.TotalMinutes:00}:{ts.Seconds:00}";
     }
 
@@ -303,8 +310,8 @@ public partial class Form1 : Form
         var cod = CodigoPeriodoSeleccionado(cmbPeriodoOperacion);
         _db.SetTextosCabecera(est.TituloLiga ?? "", est.TextoMarquee ?? "", cod);
         SeleccionarPeriodoEnCombo(cmbSubtituloPeriodo, cod);
-        var c = _db.GetCronometro();
-        _db.SetCronometro(c.TotalSeconds, true);
+        var actual = _db.GetCronometroElapsedSeconds();
+        _db.CronometroStart(actual);
         await NotifyDisplayAsync();
         ActualizarEtiquetaCronometro();
     }
@@ -314,7 +321,7 @@ public partial class Form1 : Form
         const string msg = "El cronómetro volverá a 00:00 y quedará detenido.\nEl marcador de goles no cambia.\n\n¿Desea continuar?";
         if (!ConfirmacionAccionForm.Mostrar(this, "Marcador LBG", "Detener cronómetro", msg, "Sí, detener"))
             return;
-        _db.SetCronometro(0, false);
+        _db.CronometroReset();
         await NotifyDisplayAsync();
         ActualizarEtiquetaCronometro();
     }
@@ -591,6 +598,33 @@ public partial class Form1 : Form
         _layoutEdicion = MarcadorLayoutSnapshot.CreateDefault();
         propertyGridLayout.SelectedObject = null;
         propertyGridLayout.SelectedObject = _layoutEdicion;
+        RefrescarDisenadorConDatosDisplay();
+    }
+
+    private void RefrescarDisenadorConDatosDisplay()
+    {
+        try
+        {
+            var estado = _db.GetEstado();
+            var partido = _db.GetPartidoActual();
+            var datos = new DisplayDatosPreview(
+                estado.TituloLiga ?? "",
+                estado.TextoMarquee ?? "",
+                estado.SubtituloPeriodo ?? "",
+                partido?.NombreLocal ?? "",
+                partido?.NombreVisitante ?? "",
+                partido?.LogoLocal ?? _logoLocalPath,
+                partido?.LogoVisitante ?? _logoVisitantePath,
+                estado.GolesLocal,
+                estado.GolesVisitante,
+                "00:00"
+            );
+            displayDesignerControl.AplicarLayout(_layoutEdicion, datos);
+        }
+        catch
+        {
+            displayDesignerControl.AplicarLayout(_layoutEdicion, null);
+        }
     }
 
     private void RefrescarComboLayoutPerfiles()
@@ -632,6 +666,7 @@ public partial class Form1 : Form
             _layoutEdicion = _db.GetMarcadorLayoutSnapshot();
             propertyGridLayout.SelectedObject = null;
             propertyGridLayout.SelectedObject = _layoutEdicion;
+            RefrescarDisenadorConDatosDisplay();
             await NotifyDisplayAsync();
         }
         catch (Exception ex)
@@ -685,6 +720,7 @@ public partial class Form1 : Form
             _layoutEdicion = _db.GetMarcadorLayoutSnapshot();
             propertyGridLayout.SelectedObject = null;
             propertyGridLayout.SelectedObject = _layoutEdicion;
+            RefrescarDisenadorConDatosDisplay();
             await NotifyDisplayAsync();
         }
         catch (Exception ex)

@@ -67,6 +67,8 @@ public sealed class MarcadorLayoutSnapshot
     public bool Cronometro_CentrarHorizontal { get; set; } = true;
     [Category("Cronómetro (tiempo)")] public int Cronometro_X { get; set; } = 79;
     [Category("Cronómetro (tiempo)")] public int Cronometro_Y { get; set; } = 196;
+    [Category("Cronómetro (tiempo)")] public int Cronometro_W { get; set; } = 80;
+    [Category("Cronómetro (tiempo)")] public int Cronometro_H { get; set; } = 24;
     [Category("Cronómetro (tiempo)")] public float Cronometro_FontPt { get; set; } = 16f;
     [Category("Cronómetro (tiempo)")] public bool Cronometro_Bold { get; set; } = true;
     [Category("Cronómetro (tiempo)")] public string Cronometro_FontFamily { get; set; } = "Microsoft Sans Serif";

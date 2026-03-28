@@ -246,6 +246,7 @@ public class MarcadorDb
         try { cnn.Execute("ALTER TABLE MarcadorEstado ADD COLUMN TituloLiga TEXT DEFAULT 'LIGA GUAPULO'"); } catch { }
         try { cnn.Execute("ALTER TABLE CelebracionGol ADD COLUMN InicioUtc TEXT"); } catch { }
         try { cnn.Execute("ALTER TABLE CelebracionGol ADD COLUMN EsManual INTEGER DEFAULT 0"); } catch { }
+        try { cnn.Execute("ALTER TABLE Cronometro ADD COLUMN StartedAtUtc TEXT"); } catch { }
     }
 
     public void SyncEquipos(IEnumerable<(int Id, string Nombre, string NombreCorto, string Logo)> equipos)
@@ -309,7 +310,7 @@ public class MarcadorDb
         using var tr = cnn.BeginTransaction();
         cnn.Execute("DELETE FROM GolesPartido", transaction: tr);
         cnn.Execute("UPDATE MarcadorEstado SET GolesLocal=0, GolesVisitante=0 WHERE Id=1", transaction: tr);
-        cnn.Execute("UPDATE Cronometro SET TotalSeconds=0, IsRunning=0 WHERE Id=1", transaction: tr);
+        cnn.Execute("UPDATE Cronometro SET TotalSeconds=0, IsRunning=0, StartedAtUtc=NULL WHERE Id=1", transaction: tr);
         cnn.Execute("UPDATE CelebracionGol SET Activa=0 WHERE Id=1", transaction: tr);
         tr.Commit();
     }
@@ -397,21 +398,37 @@ public class MarcadorDb
     public CronometroRow GetCronometro()
     {
         var r = new SqliteConnection(ConnectionString).QueryFirstOrDefault<CronometroRow>(
-            "SELECT TotalSeconds, IsRunning FROM Cronometro WHERE Id=1");
-        return r ?? new CronometroRow(0L, 0L);
+            "SELECT TotalSeconds, IsRunning, IFNULL(StartedAtUtc,'') AS StartedAtUtc FROM Cronometro WHERE Id=1");
+        return r ?? new CronometroRow(0L, 0L, "");
     }
 
-    public void SetCronometro(long totalSeconds, bool isRunning)
+    /// <summary>Segundos a mostrar (tiempo real si está corriendo; TotalSeconds si está pausado).</summary>
+    public long GetCronometroElapsedSeconds()
     {
-        using var cnn = new SqliteConnection(ConnectionString);
-        cnn.Execute("UPDATE Cronometro SET TotalSeconds=@T, IsRunning=@R WHERE Id=1",
-            new { T = totalSeconds, R = isRunning ? 1L : 0L });
+        var c = GetCronometro();
+        if (c.IsRunning == 1 && !string.IsNullOrWhiteSpace(c.StartedAtUtc) &&
+            DateTime.TryParse(c.StartedAtUtc, null, System.Globalization.DateTimeStyles.RoundtripKind, out var start))
+        {
+            var elapsed = (DateTime.UtcNow - start).TotalSeconds;
+            return (long)Math.Max(0, Math.Floor(elapsed));
+        }
+        return c.TotalSeconds;
     }
 
-    public void CronometroTickSegundo()
+    /// <summary>Inicia o reanuda el cronómetro. Guarda StartedAtUtc = now - totalSeconds para contar desde tiempo real.</summary>
+    public void CronometroStart(long totalSecondsActuales)
+    {
+        var startedAt = DateTime.UtcNow.AddSeconds(-totalSecondsActuales).ToString("o");
+        using var cnn = new SqliteConnection(ConnectionString);
+        cnn.Execute("UPDATE Cronometro SET TotalSeconds=@T, IsRunning=1, StartedAtUtc=@S WHERE Id=1",
+            new { T = totalSecondsActuales, S = startedAt });
+    }
+
+    /// <summary>Detiene y pone en cero el cronómetro.</summary>
+    public void CronometroReset()
     {
         using var cnn = new SqliteConnection(ConnectionString);
-        cnn.Execute("UPDATE Cronometro SET TotalSeconds = TotalSeconds + 1 WHERE Id=1 AND IsRunning = 1");
+        cnn.Execute("UPDATE Cronometro SET TotalSeconds=0, IsRunning=0, StartedAtUtc=NULL WHERE Id=1");
     }
 
     public CelebracionRow GetCelebracion()
@@ -465,5 +482,5 @@ public record JugadorRow(string Identificacion, string Nombres, string Numero, l
 public record PartidoRow(string Modo, long IdEquipoLocal, long IdEquipoVisitante, string? NombreLocal, string? NombreVisitante, string? LogoLocal, string? LogoVisitante);
 public record MarcadorEstadoRow(long GolesLocal, long GolesVisitante, string? TextoMarquee, string? SubtituloPeriodo, string? TituloLiga);
 public record GolRow(long Id, string IdentificacionJugador, long EquipoLocal, string? Minuto, string? Nombres, string? Numero);
-public record CronometroRow(long TotalSeconds, long IsRunning);
+public record CronometroRow(long TotalSeconds, long IsRunning, string? StartedAtUtc);
 public record CelebracionRow(long Activa, string? Identificacion, string? Nombres, string? Numero, string? FotoUrl, string? EscudoUrl, long GolesPartido, long GolesCampeonato, string? VisibleHastaUtc, string? InicioUtc, long EsManual);

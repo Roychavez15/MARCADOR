@@ -71,6 +71,8 @@ partial class Form1
         lblTituloLiga = new Label();
         tabPageDiseno = new TabPage();
         panelDisenoHost = new Panel();
+        splitContainerDiseno = new SplitContainer();
+        displayDesignerControl = new DisplayDesignerControl();
         propertyGridLayout = new PropertyGrid();
         panelDisenoPresets = new Panel();
         lblLayoutPerfil = new Label();
@@ -97,6 +99,10 @@ partial class Form1
         grpCabecera.SuspendLayout();
         tabPageDiseno.SuspendLayout();
         panelDisenoHost.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)splitContainerDiseno).BeginInit();
+        splitContainerDiseno.Panel1.SuspendLayout();
+        splitContainerDiseno.Panel2.SuspendLayout();
+        splitContainerDiseno.SuspendLayout();
         panelDisenoPresets.SuspendLayout();
         panelDisenoBotones.SuspendLayout();
         SuspendLayout();
@@ -700,7 +706,7 @@ partial class Form1
         // 
         // panelDisenoHost
         // 
-        panelDisenoHost.Controls.Add(propertyGridLayout);
+        panelDisenoHost.Controls.Add(splitContainerDiseno);
         panelDisenoHost.Controls.Add(panelDisenoPresets);
         panelDisenoHost.Controls.Add(panelDisenoBotones);
         panelDisenoHost.Dock = DockStyle.Fill;
@@ -710,14 +716,43 @@ partial class Form1
         panelDisenoHost.Size = new Size(797, 1172);
         panelDisenoHost.TabIndex = 0;
         // 
+        // splitContainerDiseno
+        // 
+        splitContainerDiseno.Dock = DockStyle.Fill;
+        splitContainerDiseno.Location = new Point(0, 96);
+        splitContainerDiseno.Name = "splitContainerDiseno";
+        splitContainerDiseno.Orientation = Orientation.Vertical;
+        // 
+        // splitContainerDiseno.Panel1
+        // 
+        splitContainerDiseno.Panel1.Controls.Add(displayDesignerControl);
+        splitContainerDiseno.Panel1MinSize = 120;
+        splitContainerDiseno.Panel2MinSize = 100;
+        // 
+        // splitContainerDiseno.Panel2
+        // 
+        splitContainerDiseno.Panel2.Controls.Add(propertyGridLayout);
+        splitContainerDiseno.Size = new Size(797, 1017);
+        splitContainerDiseno.SplitterDistance = 420;
+        splitContainerDiseno.TabIndex = 3;
+        // 
+        // displayDesignerControl
+        // 
+        displayDesignerControl.Dock = DockStyle.Fill;
+        displayDesignerControl.Location = new Point(0, 0);
+        displayDesignerControl.Margin = new Padding(0);
+        displayDesignerControl.Name = "displayDesignerControl";
+        displayDesignerControl.Size = new Size(420, 1017);
+        displayDesignerControl.TabIndex = 0;
+        // 
         // propertyGridLayout
         // 
         propertyGridLayout.Dock = DockStyle.Fill;
-        propertyGridLayout.Location = new Point(0, 96);
+        propertyGridLayout.Location = new Point(0, 0);
         propertyGridLayout.Margin = new Padding(3, 4, 3, 4);
         propertyGridLayout.Name = "propertyGridLayout";
         propertyGridLayout.PropertySort = PropertySort.Categorized;
-        propertyGridLayout.Size = new Size(797, 1017);
+        propertyGridLayout.Size = new Size(373, 1017);
         propertyGridLayout.TabIndex = 0;
         propertyGridLayout.ToolbarVisible = false;
         // 
@@ -885,6 +920,10 @@ partial class Form1
         grpCabecera.ResumeLayout(false);
         grpCabecera.PerformLayout();
         tabPageDiseno.ResumeLayout(false);
+        splitContainerDiseno.Panel1.ResumeLayout(false);
+        splitContainerDiseno.Panel2.ResumeLayout(false);
+        ((System.ComponentModel.ISupportInitialize)splitContainerDiseno).EndInit();
+        splitContainerDiseno.ResumeLayout(false);
         panelDisenoHost.ResumeLayout(false);
         panelDisenoPresets.ResumeLayout(false);
         panelDisenoPresets.PerformLayout();
@@ -899,6 +938,8 @@ partial class Form1
     private TabPage tabPageDiseno;
     private Panel panelScrollOperacion;
     private Panel panelDisenoHost;
+    private SplitContainer splitContainerDiseno;
+    private DisplayDesignerControl displayDesignerControl;
     private Panel panelDisenoPresets;
     private Label lblLayoutPerfil;
     private ComboBox cmbLayoutPerfiles;

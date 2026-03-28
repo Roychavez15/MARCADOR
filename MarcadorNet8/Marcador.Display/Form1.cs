@@ -11,19 +11,131 @@ public partial class Form1 : Form
 {
     private MarcadorDb _db = null!;
     private HubConnection? _hubConnection;
-    private DateTime _ultimoTickCronometroUtc = DateTime.MinValue;
     private string? _layoutJsonCache;
+    private DateTime? _cronometroStartedAtUtc;
+    private long _cronometroTotalSecondsStopped;
+    private bool _cronometroIsRunning;
+    private System.Windows.Forms.Timer? _timerCronometro;
     private static readonly HttpClient HttpImages = new() { Timeout = TimeSpan.FromSeconds(12) };
     private string? _fondoCacheKey;
     private Image? _fondoCacheImage;
     private string? _splashCelebracionKey;
     private Image? _splashCelebracionImage;
+    private string? _celebracionManualCacheKey;
+    private int _celebracionGeomJw = -1, _celebracionGeomJh = -1;
+    private int _celebracionGeomMw = -1, _celebracionGeomMh = -1;
+    private int _celebracionLayoutModo; // 1 = detalle jugador, 2 = manual
 
     public Form1()
     {
         InitializeComponent();
-        lblGolEtiquetaPartido.AutoSize = true;
-        lblGolEtiquetaCamp.AutoSize = true;
+    }
+
+    /// <summary>Referencia de diseño de la pantalla de celebración (coincide con ClientWidth/Height por defecto del marcador).</summary>
+    private const int CelebracionRefW = 256;
+    private const int CelebracionRefH = 236;
+
+    private static void AsignarFuente(Label lbl, Font nueva)
+    {
+        var anterior = lbl.Font;
+        lbl.Font = nueva;
+        anterior?.Dispose();
+    }
+
+    /// <summary>Coloca nombre, dorsal, fotos y estadísticas del gol escalados al tamaño actual del cliente (mismo que el Display).</summary>
+    private void AplicarGeometriaCelebracionDetalleJugador(int cw, int ch, bool forzar = false)
+    {
+        cw = Math.Max(64, cw);
+        ch = Math.Max(64, ch);
+        if (!forzar && _celebracionLayoutModo == 1 && cw == _celebracionGeomJw && ch == _celebracionGeomJh)
+            return;
+        _celebracionLayoutModo = 1;
+        _celebracionGeomJw = cw;
+        _celebracionGeomJh = ch;
+        var sx = cw / (float)CelebracionRefW;
+        var sy = ch / (float)CelebracionRefH;
+        var fs = Math.Min(sx, sy);
+        int S(float v) => Math.Max(1, (int)Math.Round(v));
+
+        void Place(Control c, int x, int y, int w, int h)
+        {
+            c.Location = new Point(S(x * sx), S(y * sy));
+            c.Size = new Size(S(w * sx), S(h * sy));
+        }
+
+        AsignarFuente(lblGolNombre, new Font("Arial", 11.25f * fs, FontStyle.Bold, GraphicsUnit.Point));
+        lblGolNombre.ForeColor = SystemColors.Control;
+        lblGolNombre.AutoSize = false;
+        lblGolNombre.AutoEllipsis = true;
+        lblGolNombre.TextAlign = ContentAlignment.TopCenter;
+        Place(lblGolNombre, 4, 25, 248, 32);
+
+        AsignarFuente(lblGolNumero, new Font("Arial", 20.25f * fs, FontStyle.Bold, GraphicsUnit.Point));
+        lblGolNumero.ForeColor = SystemColors.Control;
+        lblGolNumero.AutoSize = false;
+        lblGolNumero.TextAlign = ContentAlignment.MiddleCenter;
+        Place(lblGolNumero, 7, 133, 89, 40);
+
+        picGolEscudo.SizeMode = PictureBoxSizeMode.Zoom;
+        Place(picGolEscudo, 5, 60, 89, 70);
+
+        picGolFoto.SizeMode = PictureBoxSizeMode.Zoom;
+        Place(picGolFoto, 102, 60, 145, 111);
+
+        AsignarFuente(lblGolEtiquetaPartido, new Font("Arial Narrow", 9.75f * fs, FontStyle.Bold, GraphicsUnit.Point));
+        AsignarFuente(lblGolEtiquetaCamp, new Font("Arial Narrow", 9.75f * fs, FontStyle.Bold, GraphicsUnit.Point));
+        AsignarFuente(lblGolPartidoValor, new Font("Arial Narrow", 9.75f * fs, FontStyle.Bold, GraphicsUnit.Point));
+        AsignarFuente(lblGolCampValor, new Font("Arial Narrow", 9.75f * fs, FontStyle.Bold, GraphicsUnit.Point));
+
+        lblGolEtiquetaPartido.ForeColor = SystemColors.Control;
+        lblGolEtiquetaCamp.ForeColor = SystemColors.Control;
+        lblGolPartidoValor.ForeColor = SystemColors.Control;
+        lblGolCampValor.ForeColor = SystemColors.Control;
+        lblGolEtiquetaPartido.AutoSize = false;
+        lblGolEtiquetaCamp.AutoSize = false;
+        lblGolPartidoValor.AutoSize = false;
+        lblGolCampValor.AutoSize = false;
+        lblGolEtiquetaPartido.TextAlign = ContentAlignment.MiddleLeft;
+        lblGolEtiquetaCamp.TextAlign = ContentAlignment.MiddleLeft;
+        lblGolPartidoValor.TextAlign = ContentAlignment.MiddleRight;
+        lblGolCampValor.TextAlign = ContentAlignment.MiddleRight;
+        Place(lblGolEtiquetaPartido, 4, 180, 160, 22);
+        Place(lblGolEtiquetaCamp, 4, 202, 160, 22);
+        Place(lblGolPartidoValor, 172, 180, 76, 22);
+        Place(lblGolCampValor, 172, 202, 76, 22);
+    }
+
+    /// <summary>Celebración manual (escudo + nombre) con la misma escala que el área cliente del Display.</summary>
+    private void AplicarGeometriaCelebracionDetalleManual(int cw, int ch, bool forzar = false)
+    {
+        cw = Math.Max(64, cw);
+        ch = Math.Max(64, ch);
+        if (!forzar && _celebracionLayoutModo == 2 && cw == _celebracionGeomMw && ch == _celebracionGeomMh)
+            return;
+        _celebracionLayoutModo = 2;
+        _celebracionGeomMw = cw;
+        _celebracionGeomMh = ch;
+        var sx = cw / (float)CelebracionRefW;
+        var sy = ch / (float)CelebracionRefH;
+        var fs = Math.Min(sx, sy);
+        int S(float v) => Math.Max(1, (int)Math.Round(v));
+
+        var logoW = S(89 * sx);
+        var logoH = S(70 * sy);
+        picGolEscudo.SizeMode = PictureBoxSizeMode.Zoom;
+        picGolEscudo.Size = new Size(logoW, logoH);
+        picGolEscudo.Location = new Point((cw - logoW) / 2, S(60 * sy));
+
+        AsignarFuente(lblGolNombre, new Font("Segoe UI", 16f * fs, FontStyle.Bold, GraphicsUnit.Point));
+        lblGolNombre.ForeColor = Color.White;
+        lblGolNombre.AutoSize = false;
+        lblGolNombre.AutoEllipsis = true;
+        lblGolNombre.TextAlign = ContentAlignment.TopCenter;
+        var pad = S(8 * sx);
+        var gap = S(12 * Math.Min(sx, sy));
+        var topNom = picGolEscudo.Bottom + gap;
+        lblGolNombre.Location = new Point(pad, topNom);
+        lblGolNombre.Size = new Size(Math.Max(40, cw - 2 * pad), Math.Max(S(48 * sy), ch - topNom - pad));
     }
 
     protected override void OnLoad(EventArgs e)
@@ -32,12 +144,17 @@ public partial class Form1 : Form
         Directory.CreateDirectory(Path.GetDirectoryName(Config.DbPath)!);
         _db = new MarcadorDb(Config.DbPath);
         ConectarSignalR();
+        _timerCronometro = new System.Windows.Forms.Timer { Interval = 100 };
+        _timerCronometro.Tick += TimerCronometro_Tick;
+        _timerCronometro.Start();
         timerRefresh.Start();
         RefrescarTodo();
     }
 
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
+        _timerCronometro?.Stop();
+        _timerCronometro?.Dispose();
         timerRefresh.Stop();
         _fondoCacheImage?.Dispose();
         _fondoCacheImage = null;
@@ -70,6 +187,25 @@ public partial class Form1 : Form
 
     private void TimerRefresh_Tick(object? sender, EventArgs e) => RefrescarTodo();
 
+    /// <summary>Timer dedicado al cronómetro (100ms). Calcula tiempo localmente sin tocar DB; solo usa caché actualizado por RefrescarMarcador.</summary>
+    private void TimerCronometro_Tick(object? sender, EventArgs e)
+    {
+        if (IsDisposed || lblCronometro.IsDisposed) return;
+        long segundos;
+        if (_cronometroIsRunning && _cronometroStartedAtUtc.HasValue)
+        {
+            var elapsed = (DateTime.UtcNow - _cronometroStartedAtUtc.Value).TotalSeconds;
+            segundos = (long)Math.Max(0, Math.Floor(elapsed));
+        }
+        else
+            segundos = _cronometroTotalSecondsStopped;
+
+        var ts = TimeSpan.FromSeconds(segundos);
+        var txt = $"{(int)ts.TotalMinutes:00}:{ts.Seconds:00}";
+        if (lblCronometro.Text != txt)
+            lblCronometro.Text = txt;
+    }
+
     private void RefrescarTodo()
     {
         try
@@ -94,20 +230,20 @@ public partial class Form1 : Form
 
         var partido = _db.GetPartidoActual();
         var estado = _db.GetEstado();
-        var cron0 = _db.GetCronometro();
-        if (cron0.IsRunning == 1)
+        var cron = _db.GetCronometro();
+        _cronometroIsRunning = cron.IsRunning == 1;
+        if (_cronometroIsRunning && !string.IsNullOrWhiteSpace(cron.StartedAtUtc) &&
+            DateTime.TryParse(cron.StartedAtUtc, null, System.Globalization.DateTimeStyles.RoundtripKind, out var startUtc))
         {
-            var ahora = DateTime.UtcNow;
-            if ((ahora - _ultimoTickCronometroUtc).TotalSeconds >= 1.0)
-            {
-                _ultimoTickCronometroUtc = ahora;
-                _db.CronometroTickSegundo();
-            }
+            _cronometroStartedAtUtc = startUtc;
+            _cronometroTotalSecondsStopped = 0;
         }
         else
-            _ultimoTickCronometroUtc = DateTime.MinValue;
-
-        var cron = _db.GetCronometro();
+        {
+            _cronometroStartedAtUtc = null;
+            _cronometroTotalSecondsStopped = cron.TotalSeconds;
+        }
+        TimerCronometro_Tick(null, EventArgs.Empty);
 
         var titulo = (estado.TituloLiga ?? "").Trim();
         var etapa = (estado.TextoMarquee ?? "").Trim();
@@ -161,11 +297,10 @@ public partial class Form1 : Form
         picLogoLocal.Visible = lay.LogoLocal_Visible;
         picLogoVisitante.Visible = lay.LogoVisitante_Visible;
 
-        var ts = TimeSpan.FromSeconds(cron.TotalSeconds);
-        lblCronometro.Text = $"{(int)ts.TotalMinutes:00}:{ts.Seconds:00}";
-        lblCronometro.AutoSize = true;
+        lblCronometro.AutoSize = false;
+        lblCronometro.Size = new Size(Math.Max(1, lay.Cronometro_W), Math.Max(1, lay.Cronometro_H));
         if (lay.Cronometro_CentrarHorizontal)
-            lblCronometro.Location = new Point((lay.ClientWidth - lblCronometro.Width) / 2, lay.Cronometro_Y);
+            lblCronometro.Location = new Point((lay.ClientWidth - lay.Cronometro_W) / 2, lay.Cronometro_Y);
         else
             lblCronometro.Location = new Point(lay.Cronometro_X, lay.Cronometro_Y);
 
@@ -283,9 +418,11 @@ public partial class Form1 : Form
         picLogoVisitante.Location = new Point(lay.LogoVisitante_X, lay.LogoVisitante_Y);
         picLogoVisitante.Size = new Size(Math.Max(1, lay.LogoVisitante_W), Math.Max(1, lay.LogoVisitante_H));
 
+        lblNombreLocal.AutoSize = false;
         lblNombreLocal.Font = CrearFuente(lay.NombreLocal_FontFamily, lay.NombreLocal_FontPt, lay.NombreLocal_Bold);
         lblNombreLocal.ForeColor = lay.NombreLocal_Color;
         lblNombreLocal.TextAlign = ContentAlignment.TopCenter;
+        lblNombreVisitante.AutoSize = false;
         lblNombreVisitante.Font = CrearFuente(lay.NombreVisitante_FontFamily, lay.NombreVisitante_FontPt, lay.NombreVisitante_Bold);
         lblNombreVisitante.ForeColor = lay.NombreVisitante_Color;
         lblNombreVisitante.TextAlign = ContentAlignment.TopCenter;
@@ -305,6 +442,9 @@ public partial class Form1 : Form
         lblGolesVisitante.TextAlign = ContentAlignment.MiddleCenter;
 
         AplicarFondo(lay);
+
+        AplicarGeometriaCelebracionDetalleJugador(w, h, forzar: true);
+        _celebracionManualCacheKey = null;
     }
 
     private static PictureBoxSizeMode ModoImagen(int v)
@@ -378,6 +518,7 @@ public partial class Form1 : Form
         var c = _db.GetCelebracion();
         if (c.Activa != 1)
         {
+            _celebracionManualCacheKey = null;
             pnlCelebracion.Visible = false;
             picSplashGol.Visible = false;
             return;
@@ -421,11 +562,11 @@ public partial class Form1 : Form
         var elapsed = (DateTime.UtcNow - inicioUtc).TotalSeconds;
         var enSplash = splashDur > 0 && elapsed < splashDur;
 
-        pnlCelebracion.Visible = true;
-        pnlCelebracion.BringToFront();
-
         if (enSplash)
         {
+            _celebracionManualCacheKey = null;
+            pnlCelebracion.Visible = true;
+            pnlCelebracion.BringToFront();
             picSplashGol.Visible = true;
             picSplashGol.BringToFront();
             AsegurarImagenSplashCelebracion(splashPath);
@@ -433,12 +574,25 @@ public partial class Form1 : Form
             return;
         }
 
-        picSplashGol.Visible = false;
         var manual = c.EsManual == 1;
         if (manual)
-            AplicarVistaCelebracionEquipoManual(c);
+        {
+            var key = $"manual|{c.Nombres ?? ""}|{c.EscudoUrl ?? ""}";
+            if (key != _celebracionManualCacheKey)
+            {
+                _celebracionManualCacheKey = key;
+                AplicarVistaCelebracionEquipoManual(c);
+            }
+        }
         else
+        {
+            _celebracionManualCacheKey = null;
             AplicarVistaCelebracionJugador(c);
+        }
+
+        picSplashGol.Visible = false;
+        pnlCelebracion.Visible = true;
+        pnlCelebracion.BringToFront();
     }
 
     private void AsegurarImagenSplashCelebracion(string path)
@@ -481,6 +635,7 @@ public partial class Form1 : Form
 
     private void AplicarVistaCelebracionJugador(CelebracionRow c)
     {
+        pnlCelebracion.SuspendLayout();
         foreach (var ctl in ControlesDetalleCelebracion())
             ctl.Visible = true;
         RestaurarLayoutCelebracionJugadorPorDefecto();
@@ -492,10 +647,12 @@ public partial class Form1 : Form
 
         CargarLogo(picGolEscudo, c.EscudoUrl);
         CargarImagenControl(picGolFoto, c.FotoUrl);
+        pnlCelebracion.ResumeLayout(false);
     }
 
     private void AplicarVistaCelebracionEquipoManual(CelebracionRow c)
     {
+        pnlCelebracion.SuspendLayout();
         foreach (var ctl in ControlesDetalleCelebracion())
             ctl.Visible = false;
         picGolEscudo.Visible = true;
@@ -503,23 +660,14 @@ public partial class Form1 : Form
 
         var w = Math.Max(64, pnlCelebracion.ClientSize.Width);
         var h = Math.Max(64, pnlCelebracion.ClientSize.Height);
-        var logoSz = Math.Clamp(Math.Min(w - 24, (int)(h * 0.42)), 96, 220);
-        picGolEscudo.SizeMode = PictureBoxSizeMode.Zoom;
-        picGolEscudo.Size = new Size(logoSz, logoSz);
-        picGolEscudo.Location = new Point((w - logoSz) / 2, Math.Max(8, h / 2 - logoSz - 16));
+        AplicarGeometriaCelebracionDetalleManual(w, h, forzar: true);
 
         lblGolNombre.Text = c.Nombres ?? "";
-        lblGolNombre.Font = new Font("Segoe UI", 16f, FontStyle.Bold, GraphicsUnit.Point);
-        lblGolNombre.ForeColor = Color.White;
-        lblGolNombre.AutoSize = false;
-        lblGolNombre.TextAlign = ContentAlignment.TopCenter;
-        var topNombre = picGolEscudo.Bottom + 12;
-        lblGolNombre.Location = new Point(8, topNombre);
-        lblGolNombre.Size = new Size(w - 16, Math.Max(48, h - topNombre - 8));
 
         CargarLogo(picGolEscudo, c.EscudoUrl);
         picGolFoto.Image?.Dispose();
         picGolFoto.Image = null;
+        pnlCelebracion.ResumeLayout(false);
     }
 
     /// <summary>
@@ -548,33 +696,12 @@ public partial class Form1 : Form
         }
     }
 
-    /// <summary>Posiciones del diseñador para la celebración con jugador (automático).</summary>
+    /// <summary>Posiciones y fuentes de la celebración con jugador (automático), escaladas al cliente actual.</summary>
     private void RestaurarLayoutCelebracionJugadorPorDefecto()
     {
-        lblGolNombre.Font = new Font("Arial", 11.25f, FontStyle.Bold, GraphicsUnit.Point);
-        lblGolNombre.ForeColor = SystemColors.Control;
-        lblGolNombre.AutoSize = false;
-        lblGolNombre.AutoEllipsis = true;
-        lblGolNombre.TextAlign = ContentAlignment.TopCenter;
-        var wNom = Math.Max(40, pnlCelebracion.ClientSize.Width - 8);
-        lblGolNombre.Location = new Point(4, 25);
-        lblGolNombre.Size = new Size(wNom, 32);
-
-        lblGolNumero.Location = new Point(7, 133);
-        lblGolNumero.Size = new Size(89, 40);
-
-        picGolEscudo.Location = new Point(5, 60);
-        picGolEscudo.Size = new Size(89, 70);
-        picGolEscudo.SizeMode = PictureBoxSizeMode.Zoom;
-
-        picGolFoto.Location = new Point(102, 60);
-        picGolFoto.Size = new Size(145, 111);
-        picGolFoto.SizeMode = PictureBoxSizeMode.Zoom;
-
-        lblGolEtiquetaPartido.Location = new Point(4, 180);
-        lblGolEtiquetaCamp.Location = new Point(4, 202);
-        lblGolPartidoValor.Location = new Point(172, 180);
-        lblGolCampValor.Location = new Point(172, 202);
+        var w = Math.Max(64, pnlCelebracion.ClientSize.Width);
+        var h = Math.Max(64, pnlCelebracion.ClientSize.Height);
+        AplicarGeometriaCelebracionDetalleJugador(w, h);
     }
 
     private void CargarLogo(PictureBox pic, string? origen)

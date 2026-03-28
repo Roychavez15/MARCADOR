@@ -3,7 +3,7 @@
 ; Luego compilar este script (ISCC) o dejar que build-install.ps1 lo invoque si ISCC está instalado.
 
 #define MyAppName "Marcador LBG"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #define PublishDir "out\win-x64"
 #define OutputDir "dist"
 

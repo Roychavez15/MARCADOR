@@ -31,7 +31,7 @@ Opcional: además genera un ZIP para copiar por USB/red:
 **Salida:**
 
 - Carpeta lista para copiar: `installer\out\win-x64\` (contiene `Marcador.Admin.exe` y `Marcador.Display.exe` más todas las DLL).
-- Si tienes **Inno Setup 6** instalado, el script intentará generar también `installer\dist\MarcadorLBG-Setup-1.0.0-win-x64.exe`.
+- Si tienes **Inno Setup 6** instalado, el script intentará generar también `installer\dist\MarcadorLBG-Setup-<versión>-win-x64.exe` (la versión está en `#define MyAppVersion` de `Marcador.Inno.iss`).
 
 ### Instalador .exe (Inno Setup)
 

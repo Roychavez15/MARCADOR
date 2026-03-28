@@ -48,6 +48,7 @@ if ($Zip) {
 }
 
 $inno = @(
+    "${env:LOCALAPPDATA}\Programs\Inno Setup 6\ISCC.exe",
     "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
     "${env:ProgramFiles}\Inno Setup 6\ISCC.exe"
 ) | Where-Object { Test-Path $_ } | Select-Object -First 1

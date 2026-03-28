@@ -15,16 +15,16 @@ partial class Form1
     {
         components = new System.ComponentModel.Container();
         pnlMarcador = new Panel();
-        lblTituloLiga = new Label();
-        lblEtapa = new Label();
-        lblPeriodo = new Label();
-        lblNombreLocal = new Label();
-        lblNombreVisitante = new Label();
-        lblCronometro = new Label();
+        lblTituloLiga = new SingleLineLabel();
+        lblEtapa = new SingleLineLabel();
+        lblPeriodo = new SingleLineLabel();
+        lblNombreLocal = new SingleLineLabel();
+        lblNombreVisitante = new SingleLineLabel();
+        lblCronometro = new SingleLineLabel();
         picLogoLocal = new PictureBox();
         picLogoVisitante = new PictureBox();
-        lblGolesLocal = new Label();
-        lblGolesVisitante = new Label();
+        lblGolesLocal = new SingleLineLabel();
+        lblGolesVisitante = new SingleLineLabel();
         pnlCelebracion = new Panel();
         picSplashGol = new PictureBox();
         lblGolNombre = new Label();
