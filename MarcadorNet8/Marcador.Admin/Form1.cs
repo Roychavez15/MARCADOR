@@ -1,4 +1,6 @@
 using System.Drawing.Text;
+using System.Net.Http;
+using System.Threading;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,17 +10,22 @@ namespace Marcador.Admin;
 
 public partial class Form1 : Form
 {
+    private static readonly HttpClient HttpPreviewImagen = new() { Timeout = TimeSpan.FromSeconds(10) };
+
     private MarcadorDb _db = null!;
     private ApiClient _api = null!;
     private WebApplication? _signalRApp;
     private IHubContext<MarcadorHub>? _hubContext;
     private string? _logoLocalPath;
     private string? _logoVisitantePath;
+    private Image? _previewLogoLocal;
+    private Image? _previewLogoVisitante;
     private bool _sincronizacionInicialHecha;
     private readonly List<JugadorRow> _rosterLocal = new();
     private readonly List<JugadorRow> _rosterVisit = new();
     private MarcadorLayoutSnapshot _layoutEdicion = MarcadorLayoutSnapshot.CreateDefault();
     private bool _suppressLayoutPerfilCombo;
+    private bool _suppressModoRadioPersist;
 
     public Form1()
     {
@@ -34,8 +41,8 @@ public partial class Form1 : Form
         _db = new MarcadorDb(Config.DbPath);
         _api = new ApiClient(Config.ApiBaseUrl);
         IniciarSignalR();
-        radAuto.CheckedChanged += (_, _) => ActualizarModo();
-        radManual.CheckedChanged += (_, _) => ActualizarModo();
+        radAuto.CheckedChanged += (_, _) => OnModoRadioChanged();
+        radManual.CheckedChanged += (_, _) => OnModoRadioChanged();
         btnLogoLocal.Click += BtnLogoLocal_Click;
         btnLogoVisitante.Click += BtnLogoVisitante_Click;
         btnAplicarManual.Click += BtnAplicarManual_Click;
@@ -48,7 +55,7 @@ public partial class Form1 : Form
         propertyGridLayout.PropertyValueChanged += (_, _) => RefrescarDisenadorConDatosDisplay();
         tabPrincipal.SelectedIndexChanged += (_, _) => { if (tabPrincipal.SelectedTab == tabPageDiseno) RefrescarDisenadorConDatosDisplay(); };
         BeginInvoke(new Action(RefrescarDisenadorConDatosDisplay));
-        ActualizarModo();
+        AplicarModoDesdeBaseDatos();
         RefrescarUI();
         AplicarIconosBotones();
         BeginInvoke(new Action(() => _ = SincronizarAlArranqueAsync()));
@@ -57,6 +64,7 @@ public partial class Form1 : Form
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
         timerRelojAdmin.Stop();
+        LimpiarVistaPreviaLogosManual();
         _ = _signalRApp?.StopAsync();
         base.OnFormClosing(e);
     }
@@ -105,7 +113,33 @@ public partial class Form1 : Form
 
     /// <summary>Debe coincidir con la altura del <see cref="grpGoles"/> en el diseñador (listas + botones visibles).</summary>
     private const int AlturaGrpGolesAutomatico = 491;
-    private const int AlturaGrpGolesManual = 130;
+    private const int AlturaGrpGolesManual = 178;
+
+    private static bool EsModoManualEnBase(string? modo) =>
+        string.Equals((modo ?? "").Trim(), "Manual", StringComparison.OrdinalIgnoreCase);
+
+    private void AplicarModoDesdeBaseDatos()
+    {
+        var manual = EsModoManualEnBase(_db.GetPartidoActual()?.Modo);
+        _suppressModoRadioPersist = true;
+        try
+        {
+            radManual.Checked = manual;
+            radAuto.Checked = !manual;
+        }
+        finally
+        {
+            _suppressModoRadioPersist = false;
+        }
+        ActualizarModo();
+    }
+
+    private void OnModoRadioChanged()
+    {
+        if (!_suppressModoRadioPersist)
+            _db.SetSoloModoPartido(radManual.Checked ? "Manual" : "Auto");
+        ActualizarModo();
+    }
 
     private void ActualizarModo()
     {
@@ -125,6 +159,10 @@ public partial class Form1 : Form
         btnGolVisitante.Visible = manual;
         btnMenosLocal.Visible = manual;
         btnMenosVisitante.Visible = manual;
+        lblTextoGolManualLocal.Visible = manual;
+        txtTextoGolManualLocal.Visible = manual;
+        lblTextoGolManualVisitante.Visible = manual;
+        txtTextoGolManualVisitante.Visible = manual;
 
         lblListaGolesLocal.Visible = auto;
         lblListaGolesVisitante.Visible = auto;
@@ -146,6 +184,11 @@ public partial class Form1 : Form
             txtNombreVisitante.Text = p?.NombreVisitante ?? "";
             _logoLocalPath = p?.LogoLocal;
             _logoVisitantePath = p?.LogoVisitante;
+            ActualizarVistaPreviaLogosManual();
+        }
+        else
+        {
+            LimpiarVistaPreviaLogosManual();
         }
 
         RefrescarUI();
@@ -266,12 +309,12 @@ public partial class Form1 : Form
         }
     }
 
-    private async Task RegistrarGolAsync(bool esLocal, string? identificacionJugador)
+    private async Task RegistrarGolAsync(bool esLocal, string? identificacionJugador, string? textoCelebracionManual = null)
     {
         _db.AgregarGol(esLocal ? 1 : 0, identificacionJugador, null);
         _db.RecalcularMarcadorDesdeGoles();
         if (string.IsNullOrWhiteSpace(identificacionJugador))
-            ActivarCelebracionEquipoManual(esLocal);
+            ActivarCelebracionEquipoManual(esLocal, textoCelebracionManual);
         else
             ActivarCelebracionSiJugador(identificacionJugador, esLocal);
         await NotifyDisplayAsync();
@@ -412,12 +455,12 @@ public partial class Form1 : Form
 
     private async void BtnGolLocal_Click(object? sender, EventArgs e)
     {
-        await RegistrarGolAsync(esLocal: true, identificacionJugador: null);
+        await RegistrarGolAsync(esLocal: true, identificacionJugador: null, textoCelebracionManual: txtTextoGolManualLocal.Text);
     }
 
     private async void BtnGolVisitante_Click(object? sender, EventArgs e)
     {
-        await RegistrarGolAsync(esLocal: false, identificacionJugador: null);
+        await RegistrarGolAsync(esLocal: false, identificacionJugador: null, textoCelebracionManual: txtTextoGolManualVisitante.Text);
     }
 
     private void ActivarCelebracionSiJugador(string? identificacion, bool esLocal)
@@ -435,7 +478,8 @@ public partial class Form1 : Form
         _db.ActivarCelebracionGol(j.Identificacion, j.Nombres, j.Numero, j.Foto, escudoUrl, golesPartido, golesCampeonato, esManual: false, splash, detalle);
     }
 
-    private void ActivarCelebracionEquipoManual(bool esLocal)
+    /// <param name="textoGoleadorOpcional">Texto extra bajo el escudo (ej. nombre del goleador). Se guarda en Identificacion solo en modo manual.</param>
+    private void ActivarCelebracionEquipoManual(bool esLocal, string? textoGoleadorOpcional)
     {
         var partido = _db.GetPartidoActual();
         var nom = esLocal ? partido?.NombreLocal?.Trim() : partido?.NombreVisitante?.Trim();
@@ -445,7 +489,8 @@ public partial class Form1 : Form
         var est = _db.GetEstado();
         var golesEq = esLocal ? est.GolesLocal : est.GolesVisitante;
         var (splash, detalle) = LeerDuracionesCelebracionLayout();
-        _db.ActivarCelebracionGol("", nom, "", "", logo ?? "", golesEq, 0, esManual: true, splash, detalle);
+        var extra = (textoGoleadorOpcional ?? "").Trim();
+        _db.ActivarCelebracionGol(extra, nom, "", "", logo ?? "", golesEq, 0, esManual: true, splash, detalle);
     }
 
     private static bool RutaImagenCelebracionIntermediaValida(string? path)
@@ -510,14 +555,84 @@ public partial class Form1 : Form
         RefrescarUI();
     }
 
+    private void LimpiarVistaPreviaLogosManual()
+    {
+        picPreviewLogoLocal.Image = null;
+        picPreviewLogoVisitante.Image = null;
+        _previewLogoLocal?.Dispose();
+        _previewLogoVisitante?.Dispose();
+        _previewLogoLocal = null;
+        _previewLogoVisitante = null;
+    }
+
+    private void ActualizarVistaPreviaLogosManual()
+    {
+        if (!radManual.Checked)
+            return;
+        AsignarImagenPreview(ref _previewLogoLocal, picPreviewLogoLocal, _logoLocalPath);
+        AsignarImagenPreview(ref _previewLogoVisitante, picPreviewLogoVisitante, _logoVisitantePath);
+    }
+
+    private static void AsignarImagenPreview(ref Image? cache, PictureBox pic, string? pathOrUrl)
+    {
+        pic.Image = null;
+        cache?.Dispose();
+        cache = null;
+        var s = (pathOrUrl ?? "").Trim();
+        if (s.Length == 0)
+            return;
+        try
+        {
+            Image? img = null;
+            if (s.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            {
+                var bytes = HttpPreviewImagen.GetByteArrayAsync(s).GetAwaiter().GetResult();
+                using var ms = new MemoryStream(bytes);
+                img = Image.FromStream(ms);
+            }
+            else if (File.Exists(s))
+            {
+                img = ImagenArchivoSinBloqueo.CrearDesdeArchivo(s);
+            }
+
+            if (img == null)
+                return;
+            cache = img;
+            pic.Image = img;
+        }
+        catch
+        {
+            cache?.Dispose();
+            cache = null;
+        }
+    }
+
+    private static void CopiarArchivoLogoConReintentos(string origen, string destino)
+    {
+        const int maxIntentos = 5;
+        for (var i = 1; i <= maxIntentos; i++)
+        {
+            try
+            {
+                File.Copy(origen, destino, true);
+                return;
+            }
+            catch (IOException) when (i < maxIntentos)
+            {
+                Thread.Sleep(100);
+            }
+        }
+    }
+
     private void BtnLogoLocal_Click(object? sender, EventArgs e)
     {
         using var ofd = new OpenFileDialog { Filter = "Imágenes|*.png;*.jpg;*.jpeg" };
         if (ofd.ShowDialog() == DialogResult.OK)
         {
             var dest = Path.Combine(Path.GetDirectoryName(Config.DbPath)!, "logo_local" + Path.GetExtension(ofd.FileName));
-            File.Copy(ofd.FileName, dest, true);
+            CopiarArchivoLogoConReintentos(ofd.FileName, dest);
             _logoLocalPath = dest;
+            ActualizarVistaPreviaLogosManual();
             if (radManual.Checked)
                 AplicarSoloNombresLogosManual();
             else
@@ -535,8 +650,9 @@ public partial class Form1 : Form
         if (ofd.ShowDialog() == DialogResult.OK)
         {
             var dest = Path.Combine(Path.GetDirectoryName(Config.DbPath)!, "logo_visitante" + Path.GetExtension(ofd.FileName));
-            File.Copy(ofd.FileName, dest, true);
+            CopiarArchivoLogoConReintentos(ofd.FileName, dest);
             _logoVisitantePath = dest;
+            ActualizarVistaPreviaLogosManual();
             if (radManual.Checked)
                 AplicarSoloNombresLogosManual();
             else
@@ -562,6 +678,7 @@ public partial class Form1 : Form
         _db.ReiniciarPartidoEnJuego();
         await NotifyDisplayAsync();
         RefrescarUI();
+        ActualizarVistaPreviaLogosManual();
     }
 
     /// <summary>Actualiza nombres/logos en BD sin reiniciar marcador ni tiempo (p. ej. tras elegir logo).</summary>
@@ -737,6 +854,7 @@ public partial class Form1 : Form
         _layoutEdicion.Fondo_ImagenPath = ofd.FileName;
         _layoutEdicion.Fondo_UsarImagen = true;
         propertyGridLayout.Refresh();
+        RefrescarDisenadorConDatosDisplay();
     }
 
     private void BtnQuitarFondo_Click(object? sender, EventArgs e)
@@ -744,6 +862,7 @@ public partial class Form1 : Form
         _layoutEdicion.Fondo_UsarImagen = false;
         _layoutEdicion.Fondo_ImagenPath = "";
         propertyGridLayout.Refresh();
+        RefrescarDisenadorConDatosDisplay();
     }
 
     private void BtnElegirImagenGolIntermedia_Click(object? sender, EventArgs e)
@@ -753,12 +872,77 @@ public partial class Form1 : Form
             return;
         _layoutEdicion.Celebracion_ImagenIntermediaPath = ofd.FileName;
         propertyGridLayout.Refresh();
+        RefrescarDisenadorConDatosDisplay();
     }
 
     private void BtnQuitarImagenGolIntermedia_Click(object? sender, EventArgs e)
     {
         _layoutEdicion.Celebracion_ImagenIntermediaPath = "";
         propertyGridLayout.Refresh();
+        RefrescarDisenadorConDatosDisplay();
+    }
+
+    private void BtnLayoutExportarArchivo_Click(object? sender, EventArgs e)
+    {
+        try
+        {
+            propertyGridLayout.Refresh();
+            using var sfd = new SaveFileDialog
+            {
+                Filter = "Diseño marcador JSON (*.json)|*.json|Todos los archivos|*.*",
+                DefaultExt = "json",
+                FileName = $"marcador-diseno-{DateTime.Now:yyyyMMdd-HHmm}.json",
+                Title = "Exportar diseño"
+            };
+            if (sfd.ShowDialog() != DialogResult.OK)
+                return;
+            var json = MarcadorLayoutSnapshot.ToJson(_layoutEdicion);
+            File.WriteAllText(sfd.FileName, json);
+            MessageBox.Show($"Se guardó una copia del diseño en:\n{sfd.FileName}", "Exportar diseño");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Exportar diseño");
+        }
+    }
+
+    private void BtnLayoutImportarArchivo_Click(object? sender, EventArgs e)
+    {
+        try
+        {
+            using var ofd = new OpenFileDialog
+            {
+                Filter = "JSON (*.json)|*.json|Todos los archivos|*.*",
+                Title = "Importar diseño"
+            };
+            if (ofd.ShowDialog() != DialogResult.OK)
+                return;
+            var json = File.ReadAllText(ofd.FileName);
+            var snap = MarcadorLayoutSnapshot.FromJson(json);
+            if (snap == null)
+            {
+                MessageBox.Show("El archivo no contiene un diseño válido (JSON incorrecto).", "Importar diseño");
+                return;
+            }
+            if (snap.ClientWidth < 80 || snap.ClientHeight < 80)
+            {
+                MessageBox.Show("El diseño importado tiene un tamaño de ventana inválido (mín. 80×80).", "Importar diseño");
+                return;
+            }
+            _layoutEdicion = snap;
+            propertyGridLayout.SelectedObject = null;
+            propertyGridLayout.SelectedObject = _layoutEdicion;
+            propertyGridLayout.Refresh();
+            RefrescarDisenadorConDatosDisplay();
+            MessageBox.Show(
+                "Diseño cargado en el editor (vista previa y cuadro de propiedades).\n\n" +
+                "Pulse «Guardar diseño» para guardarlo en el perfil activo de la base de datos y enviarlo al marcador en pantalla.",
+                "Importar diseño");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Importar diseño");
+        }
     }
 
     private async Task NotifyDisplayAsync()
@@ -885,6 +1069,8 @@ public partial class Form1 : Form
         AsignarIconoBoton(btnQuitarFondo, "\uE711");
         AsignarIconoBoton(btnElegirImagenGolIntermedia, "\uE722");
         AsignarIconoBoton(btnQuitarImagenGolIntermedia, "\uE711");
+        AsignarIconoBoton(btnLayoutExportarArchivo, "\uEDE1");
+        AsignarIconoBoton(btnLayoutImportarArchivo, "\uE838");
     }
 
     private sealed record EquipoComboItem(long Id, string Display)

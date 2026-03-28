@@ -28,6 +28,7 @@ partial class Form1
         pnlCelebracion = new Panel();
         picSplashGol = new PictureBox();
         lblGolNombre = new Label();
+        lblGolManualExtra = new Label();
         lblGolNumero = new Label();
         lblGolPartidoValor = new Label();
         lblGolCampValor = new Label();
@@ -155,6 +156,7 @@ partial class Form1
         pnlCelebracion.Controls.Add(lblGolCampValor);
         pnlCelebracion.Controls.Add(lblGolPartidoValor);
         pnlCelebracion.Controls.Add(lblGolNumero);
+        pnlCelebracion.Controls.Add(lblGolManualExtra);
         pnlCelebracion.Controls.Add(lblGolNombre);
 
         lblGolNombre.Font = new Font("Arial", 11.25F, FontStyle.Bold);
@@ -163,6 +165,15 @@ partial class Form1
         lblGolNombre.Size = new Size(248, 32);
         lblGolNombre.Text = "Jugador";
         lblGolNombre.TextAlign = ContentAlignment.TopCenter;
+
+        lblGolManualExtra.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point);
+        lblGolManualExtra.ForeColor = Color.White;
+        lblGolManualExtra.Location = new Point(4, 170);
+        lblGolManualExtra.Size = new Size(248, 40);
+        lblGolManualExtra.Text = "";
+        lblGolManualExtra.TextAlign = ContentAlignment.TopCenter;
+        lblGolManualExtra.AutoEllipsis = true;
+        lblGolManualExtra.Visible = false;
 
         lblGolNumero.Font = new Font("Arial", 20.25F, FontStyle.Bold);
         lblGolNumero.ForeColor = SystemColors.Control;
@@ -244,6 +255,7 @@ partial class Form1
     internal Panel pnlCelebracion;
     internal PictureBox picSplashGol;
     internal Label lblGolNombre;
+    internal Label lblGolManualExtra;
     internal Label lblGolNumero;
     internal Label lblGolPartidoValor;
     internal Label lblGolCampValor;

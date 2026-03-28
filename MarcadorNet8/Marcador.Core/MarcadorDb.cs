@@ -298,8 +298,17 @@ public class MarcadorDb
     {
         using var cnn = new SqliteConnection(ConnectionString);
         cnn.Execute(
-            "UPDATE PartidoActual SET IdEquipoLocal=@IdL, IdEquipoVisitante=@IdV, NombreLocal=@NomL, NombreVisitante=@NomV, LogoLocal=@LogL, LogoVisitante=@LogV WHERE Id=1",
+            "UPDATE PartidoActual SET Modo='Auto', IdEquipoLocal=@IdL, IdEquipoVisitante=@IdV, NombreLocal=@NomL, NombreVisitante=@NomV, LogoLocal=@LogL, LogoVisitante=@LogV WHERE Id=1",
             new { IdL = idLocal ?? 0L, IdV = idVisitante ?? 0L, NomL = nombreLocal ?? "", NomV = nombreVisitante ?? "", LogL = logoLocal ?? "", LogV = logoVisitante ?? "" });
+    }
+
+    /// <summary>Persiste solo la etiqueta de modo (Automático/Manual) para que el Admin recuerde la selección al reiniciar.</summary>
+    public void SetSoloModoPartido(string modo)
+    {
+        var m = (modo ?? "").Trim();
+        if (string.IsNullOrEmpty(m)) return;
+        using var cnn = new SqliteConnection(ConnectionString);
+        cnn.Execute("UPDATE PartidoActual SET Modo=@M WHERE Id=1", new { M = m });
     }
 
     /// <summary>Reinicia estado del partido en curso: goles, cronómetro y celebración.</summary>

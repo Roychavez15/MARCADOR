@@ -29,6 +29,8 @@ partial class Form1
         cmbVisitante = new ComboBox();
         cmbLocal = new ComboBox();
         grpManual = new GroupBox();
+        picPreviewLogoVisitante = new PictureBox();
+        picPreviewLogoLocal = new PictureBox();
         txtNombreVisitante = new TextBox();
         txtNombreLocal = new TextBox();
         btnLogoVisitante = new Button();
@@ -56,6 +58,10 @@ partial class Form1
         lblComboJugadoresLocal = new Label();
         lblAyudaListas = new Label();
         lblMarcador = new Label();
+        lblTextoGolManualLocal = new Label();
+        txtTextoGolManualLocal = new TextBox();
+        lblTextoGolManualVisitante = new Label();
+        txtTextoGolManualVisitante = new TextBox();
         btnGolLocal = new Button();
         btnGolVisitante = new Button();
         btnMenosLocal = new Button();
@@ -75,15 +81,24 @@ partial class Form1
         displayDesignerControl = new DisplayDesignerControl();
         propertyGridLayout = new PropertyGrid();
         panelDisenoPresets = new Panel();
-        lblLayoutPerfil = new Label();
-        cmbLayoutPerfiles = new ComboBox();
-        btnElegirFondo = new Button();
-        btnQuitarFondo = new Button();
-        btnElegirImagenGolIntermedia = new Button();
-        btnQuitarImagenGolIntermedia = new Button();
-        txtLayoutPerfilNombre = new TextBox();
-        btnLayoutGuardarComo = new Button();
+        grpDisenoPerfiles = new GroupBox();
         btnLayoutEliminarPerfil = new Button();
+        btnLayoutGuardarComo = new Button();
+        txtLayoutPerfilNombre = new TextBox();
+        lblDisenoNuevoPerfil = new Label();
+        cmbLayoutPerfiles = new ComboBox();
+        lblLayoutPerfil = new Label();
+        grpDisenoImagenes = new GroupBox();
+        btnQuitarImagenGolIntermedia = new Button();
+        btnElegirImagenGolIntermedia = new Button();
+        lblDisenoSplashGol = new Label();
+        btnQuitarFondo = new Button();
+        btnElegirFondo = new Button();
+        lblDisenoFondo = new Label();
+        grpDisenoArchivo = new GroupBox();
+        btnLayoutImportarArchivo = new Button();
+        btnLayoutExportarArchivo = new Button();
+        lblDisenoArchivoAyuda = new Label();
         panelDisenoBotones = new Panel();
         btnLayoutPredeterminado = new Button();
         btnGuardarLayoutMarcador = new Button();
@@ -93,6 +108,8 @@ partial class Form1
         grpModo.SuspendLayout();
         grpEquipos.SuspendLayout();
         grpManual.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)picPreviewLogoVisitante).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)picPreviewLogoLocal).BeginInit();
         grpCronometro.SuspendLayout();
         grpGoles.SuspendLayout();
         tabPageTextos.SuspendLayout();
@@ -104,6 +121,9 @@ partial class Form1
         splitContainerDiseno.Panel2.SuspendLayout();
         splitContainerDiseno.SuspendLayout();
         panelDisenoPresets.SuspendLayout();
+        grpDisenoPerfiles.SuspendLayout();
+        grpDisenoImagenes.SuspendLayout();
+        grpDisenoArchivo.SuspendLayout();
         panelDisenoBotones.SuspendLayout();
         SuspendLayout();
         // 
@@ -122,7 +142,7 @@ partial class Form1
         tabPrincipal.Margin = new Padding(3, 4, 3, 4);
         tabPrincipal.Name = "tabPrincipal";
         tabPrincipal.SelectedIndex = 0;
-        tabPrincipal.Size = new Size(823, 1227);
+        tabPrincipal.Size = new Size(1000, 1227);
         tabPrincipal.TabIndex = 0;
         // 
         // tabPageOperacion
@@ -131,7 +151,7 @@ partial class Form1
         tabPageOperacion.Location = new Point(4, 29);
         tabPageOperacion.Margin = new Padding(3, 4, 3, 4);
         tabPageOperacion.Name = "tabPageOperacion";
-        tabPageOperacion.Size = new Size(815, 1194);
+        tabPageOperacion.Size = new Size(992, 1194);
         tabPageOperacion.TabIndex = 0;
         tabPageOperacion.Text = "Operación";
         tabPageOperacion.UseVisualStyleBackColor = true;
@@ -150,7 +170,7 @@ partial class Form1
         panelScrollOperacion.Location = new Point(0, 0);
         panelScrollOperacion.Margin = new Padding(3, 4, 3, 4);
         panelScrollOperacion.Name = "panelScrollOperacion";
-        panelScrollOperacion.Size = new Size(815, 1194);
+        panelScrollOperacion.Size = new Size(992, 1194);
         panelScrollOperacion.TabIndex = 0;
         // 
         // grpModo
@@ -260,6 +280,8 @@ partial class Form1
         // 
         // grpManual
         // 
+        grpManual.Controls.Add(picPreviewLogoVisitante);
+        grpManual.Controls.Add(picPreviewLogoLocal);
         grpManual.Controls.Add(txtNombreVisitante);
         grpManual.Controls.Add(txtNombreLocal);
         grpManual.Controls.Add(btnLogoVisitante);
@@ -269,19 +291,41 @@ partial class Form1
         grpManual.Margin = new Padding(3, 4, 3, 4);
         grpManual.Name = "grpManual";
         grpManual.Padding = new Padding(3, 4, 3, 4);
-        grpManual.Size = new Size(658, 157);
+        grpManual.Size = new Size(658, 165);
         grpManual.TabIndex = 3;
         grpManual.TabStop = false;
         grpManual.Text = "Modo manual";
         grpManual.Visible = false;
         // 
+        // picPreviewLogoVisitante
+        // 
+        picPreviewLogoVisitante.BorderStyle = BorderStyle.FixedSingle;
+        picPreviewLogoVisitante.Location = new Point(531, 69);
+        picPreviewLogoVisitante.Margin = new Padding(3, 4, 3, 4);
+        picPreviewLogoVisitante.Name = "picPreviewLogoVisitante";
+        picPreviewLogoVisitante.Size = new Size(52, 52);
+        picPreviewLogoVisitante.SizeMode = PictureBoxSizeMode.Zoom;
+        picPreviewLogoVisitante.TabIndex = 5;
+        picPreviewLogoVisitante.TabStop = false;
+        // 
+        // picPreviewLogoLocal
+        // 
+        picPreviewLogoLocal.BorderStyle = BorderStyle.FixedSingle;
+        picPreviewLogoLocal.Location = new Point(531, 24);
+        picPreviewLogoLocal.Margin = new Padding(3, 4, 3, 4);
+        picPreviewLogoLocal.Name = "picPreviewLogoLocal";
+        picPreviewLogoLocal.Size = new Size(52, 52);
+        picPreviewLogoLocal.SizeMode = PictureBoxSizeMode.Zoom;
+        picPreviewLogoLocal.TabIndex = 6;
+        picPreviewLogoLocal.TabStop = false;
+        // 
         // txtNombreVisitante
         // 
-        txtNombreVisitante.Location = new Point(91, 73);
+        txtNombreVisitante.Location = new Point(91, 79);
         txtNombreVisitante.Margin = new Padding(3, 4, 3, 4);
         txtNombreVisitante.Name = "txtNombreVisitante";
         txtNombreVisitante.PlaceholderText = "Nombre equipo visitante";
-        txtNombreVisitante.Size = new Size(445, 27);
+        txtNombreVisitante.Size = new Size(334, 27);
         txtNombreVisitante.TabIndex = 0;
         // 
         // txtNombreLocal
@@ -290,12 +334,12 @@ partial class Form1
         txtNombreLocal.Margin = new Padding(3, 4, 3, 4);
         txtNombreLocal.Name = "txtNombreLocal";
         txtNombreLocal.PlaceholderText = "Nombre equipo local";
-        txtNombreLocal.Size = new Size(445, 27);
+        txtNombreLocal.Size = new Size(334, 27);
         txtNombreLocal.TabIndex = 1;
         // 
         // btnLogoVisitante
         // 
-        btnLogoVisitante.Location = new Point(546, 71);
+        btnLogoVisitante.Location = new Point(435, 77);
         btnLogoVisitante.Margin = new Padding(3, 4, 3, 4);
         btnLogoVisitante.Name = "btnLogoVisitante";
         btnLogoVisitante.Size = new Size(86, 33);
@@ -304,7 +348,7 @@ partial class Form1
         // 
         // btnLogoLocal
         // 
-        btnLogoLocal.Location = new Point(546, 31);
+        btnLogoLocal.Location = new Point(435, 31);
         btnLogoLocal.Margin = new Padding(3, 4, 3, 4);
         btnLogoLocal.Name = "btnLogoLocal";
         btnLogoLocal.Size = new Size(86, 33);
@@ -313,7 +357,7 @@ partial class Form1
         // 
         // btnAplicarManual
         // 
-        btnAplicarManual.Location = new Point(17, 115);
+        btnAplicarManual.Location = new Point(17, 125);
         btnAplicarManual.Margin = new Padding(3, 4, 3, 4);
         btnAplicarManual.Name = "btnAplicarManual";
         btnAplicarManual.Size = new Size(617, 37);
@@ -328,7 +372,7 @@ partial class Form1
         grpCronometro.Controls.Add(btnEnviarPeriodoCron);
         grpCronometro.Controls.Add(cmbPeriodoOperacion);
         grpCronometro.Controls.Add(lblPeriodoOperacion);
-        grpCronometro.Location = new Point(14, 285);
+        grpCronometro.Location = new Point(14, 293);
         grpCronometro.Margin = new Padding(3, 4, 3, 4);
         grpCronometro.Name = "grpCronometro";
         grpCronometro.Padding = new Padding(3, 4, 3, 4);
@@ -411,11 +455,15 @@ partial class Form1
         grpGoles.Controls.Add(lblComboJugadoresLocal);
         grpGoles.Controls.Add(lblAyudaListas);
         grpGoles.Controls.Add(lblMarcador);
+        grpGoles.Controls.Add(lblTextoGolManualLocal);
+        grpGoles.Controls.Add(txtTextoGolManualLocal);
+        grpGoles.Controls.Add(lblTextoGolManualVisitante);
+        grpGoles.Controls.Add(txtTextoGolManualVisitante);
         grpGoles.Controls.Add(btnGolLocal);
         grpGoles.Controls.Add(btnGolVisitante);
         grpGoles.Controls.Add(btnMenosLocal);
         grpGoles.Controls.Add(btnMenosVisitante);
-        grpGoles.Location = new Point(14, 419);
+        grpGoles.Location = new Point(14, 427);
         grpGoles.Margin = new Padding(3, 4, 3, 4);
         grpGoles.Name = "grpGoles";
         grpGoles.Padding = new Padding(3, 4, 3, 4);
@@ -554,6 +602,46 @@ partial class Form1
         lblMarcador.TabIndex = 13;
         lblMarcador.Text = "0 - 0";
         // 
+        // lblTextoGolManualLocal
+        // 
+        lblTextoGolManualLocal.AutoSize = true;
+        lblTextoGolManualLocal.Location = new Point(17, 118);
+        lblTextoGolManualLocal.Name = "lblTextoGolManualLocal";
+        lblTextoGolManualLocal.Size = new Size(113, 20);
+        lblTextoGolManualLocal.TabIndex = 18;
+        lblTextoGolManualLocal.Text = "Goleador Local:";
+        lblTextoGolManualLocal.Visible = false;
+        // 
+        // txtTextoGolManualLocal
+        // 
+        txtTextoGolManualLocal.Location = new Point(17, 141);
+        txtTextoGolManualLocal.Margin = new Padding(3, 4, 3, 4);
+        txtTextoGolManualLocal.Name = "txtTextoGolManualLocal";
+        txtTextoGolManualLocal.PlaceholderText = "Ej. nombre del goleador";
+        txtTextoGolManualLocal.Size = new Size(154, 27);
+        txtTextoGolManualLocal.TabIndex = 19;
+        txtTextoGolManualLocal.Visible = false;
+        // 
+        // lblTextoGolManualVisitante
+        // 
+        lblTextoGolManualVisitante.AutoSize = true;
+        lblTextoGolManualVisitante.Location = new Point(183, 118);
+        lblTextoGolManualVisitante.Name = "lblTextoGolManualVisitante";
+        lblTextoGolManualVisitante.Size = new Size(135, 20);
+        lblTextoGolManualVisitante.TabIndex = 20;
+        lblTextoGolManualVisitante.Text = "Goleador Visitante:";
+        lblTextoGolManualVisitante.Visible = false;
+        // 
+        // txtTextoGolManualVisitante
+        // 
+        txtTextoGolManualVisitante.Location = new Point(183, 141);
+        txtTextoGolManualVisitante.Margin = new Padding(3, 4, 3, 4);
+        txtTextoGolManualVisitante.Name = "txtTextoGolManualVisitante";
+        txtTextoGolManualVisitante.PlaceholderText = "Ej. nombre del goleador";
+        txtTextoGolManualVisitante.Size = new Size(173, 27);
+        txtTextoGolManualVisitante.TabIndex = 21;
+        txtTextoGolManualVisitante.Visible = false;
+        // 
         // btnGolLocal
         // 
         btnGolLocal.Location = new Point(17, 77);
@@ -601,7 +689,7 @@ partial class Form1
         tabPageTextos.Margin = new Padding(3, 4, 3, 4);
         tabPageTextos.Name = "tabPageTextos";
         tabPageTextos.Padding = new Padding(9, 11, 9, 11);
-        tabPageTextos.Size = new Size(815, 1194);
+        tabPageTextos.Size = new Size(992, 1194);
         tabPageTextos.TabIndex = 1;
         tabPageTextos.Text = "Textos pantalla";
         tabPageTextos.UseVisualStyleBackColor = true;
@@ -620,7 +708,7 @@ partial class Form1
         grpCabecera.Margin = new Padding(3, 4, 3, 4);
         grpCabecera.Name = "grpCabecera";
         grpCabecera.Padding = new Padding(3, 4, 3, 4);
-        grpCabecera.Size = new Size(797, 1172);
+        grpCabecera.Size = new Size(974, 1172);
         grpCabecera.TabIndex = 0;
         grpCabecera.TabStop = false;
         grpCabecera.Text = "Textos pantalla (título, etapa, periodo)";
@@ -628,7 +716,7 @@ partial class Form1
         // btnGuardarCabecera
         // 
         btnGuardarCabecera.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        btnGuardarCabecera.Location = new Point(691, 109);
+        btnGuardarCabecera.Location = new Point(868, 109);
         btnGuardarCabecera.Margin = new Padding(3, 4, 3, 4);
         btnGuardarCabecera.Name = "btnGuardarCabecera";
         btnGuardarCabecera.Size = new Size(91, 37);
@@ -650,7 +738,7 @@ partial class Form1
         lblSubtituloPeriodo.AutoSize = true;
         lblSubtituloPeriodo.Location = new Point(14, 115);
         lblSubtituloPeriodo.Name = "lblSubtituloPeriodo";
-        lblSubtituloPeriodo.Size = new Size(63, 20);
+        lblSubtituloPeriodo.Size = new Size(115, 20);
         lblSubtituloPeriodo.TabIndex = 2;
         lblSubtituloPeriodo.Text = "Periodo (PT/ST):";
         // 
@@ -661,7 +749,7 @@ partial class Form1
         txtEtapaMarquee.Margin = new Padding(3, 4, 3, 4);
         txtEtapaMarquee.Name = "txtEtapaMarquee";
         txtEtapaMarquee.PlaceholderText = "Ej. SEGUNDA ETAPA";
-        txtEtapaMarquee.Size = new Size(1048, 27);
+        txtEtapaMarquee.Size = new Size(1225, 27);
         txtEtapaMarquee.TabIndex = 3;
         // 
         // lblEtapaMarquee
@@ -680,7 +768,7 @@ partial class Form1
         txtTituloLiga.Margin = new Padding(3, 4, 3, 4);
         txtTituloLiga.Name = "txtTituloLiga";
         txtTituloLiga.PlaceholderText = "Ej. LIGA GUAPULO";
-        txtTituloLiga.Size = new Size(1071, 27);
+        txtTituloLiga.Size = new Size(1248, 27);
         txtTituloLiga.TabIndex = 5;
         // 
         // lblTituloLiga
@@ -699,7 +787,7 @@ partial class Form1
         tabPageDiseno.Margin = new Padding(3, 4, 3, 4);
         tabPageDiseno.Name = "tabPageDiseno";
         tabPageDiseno.Padding = new Padding(9, 11, 9, 11);
-        tabPageDiseno.Size = new Size(815, 1194);
+        tabPageDiseno.Size = new Size(992, 1194);
         tabPageDiseno.TabIndex = 2;
         tabPageDiseno.Text = "Diseño marcador";
         tabPageDiseno.UseVisualStyleBackColor = true;
@@ -713,36 +801,36 @@ partial class Form1
         panelDisenoHost.Location = new Point(9, 11);
         panelDisenoHost.Margin = new Padding(3, 4, 3, 4);
         panelDisenoHost.Name = "panelDisenoHost";
-        panelDisenoHost.Size = new Size(797, 1172);
+        panelDisenoHost.Size = new Size(974, 1172);
         panelDisenoHost.TabIndex = 0;
         // 
         // splitContainerDiseno
         // 
         splitContainerDiseno.Dock = DockStyle.Fill;
-        splitContainerDiseno.Location = new Point(0, 96);
+        splitContainerDiseno.Location = new Point(0, 356);
         splitContainerDiseno.Name = "splitContainerDiseno";
-        splitContainerDiseno.Orientation = Orientation.Vertical;
         // 
         // splitContainerDiseno.Panel1
         // 
         splitContainerDiseno.Panel1.Controls.Add(displayDesignerControl);
         splitContainerDiseno.Panel1MinSize = 120;
-        splitContainerDiseno.Panel2MinSize = 100;
         // 
         // splitContainerDiseno.Panel2
         // 
         splitContainerDiseno.Panel2.Controls.Add(propertyGridLayout);
-        splitContainerDiseno.Size = new Size(797, 1017);
-        splitContainerDiseno.SplitterDistance = 420;
+        splitContainerDiseno.Panel2MinSize = 100;
+        splitContainerDiseno.Size = new Size(974, 757);
+        splitContainerDiseno.SplitterDistance = 500;
         splitContainerDiseno.TabIndex = 3;
         // 
         // displayDesignerControl
         // 
+        displayDesignerControl.BackColor = Color.FromArgb(45, 45, 48);
         displayDesignerControl.Dock = DockStyle.Fill;
         displayDesignerControl.Location = new Point(0, 0);
         displayDesignerControl.Margin = new Padding(0);
         displayDesignerControl.Name = "displayDesignerControl";
-        displayDesignerControl.Size = new Size(420, 1017);
+        displayDesignerControl.Size = new Size(500, 757);
         displayDesignerControl.TabIndex = 0;
         // 
         // propertyGridLayout
@@ -752,115 +840,216 @@ partial class Form1
         propertyGridLayout.Margin = new Padding(3, 4, 3, 4);
         propertyGridLayout.Name = "propertyGridLayout";
         propertyGridLayout.PropertySort = PropertySort.Categorized;
-        propertyGridLayout.Size = new Size(373, 1017);
+        propertyGridLayout.Size = new Size(470, 757);
         propertyGridLayout.TabIndex = 0;
         propertyGridLayout.ToolbarVisible = false;
         // 
         // panelDisenoPresets
         // 
-        panelDisenoPresets.Controls.Add(lblLayoutPerfil);
-        panelDisenoPresets.Controls.Add(cmbLayoutPerfiles);
-        panelDisenoPresets.Controls.Add(btnElegirImagenGolIntermedia);
-        panelDisenoPresets.Controls.Add(btnQuitarImagenGolIntermedia);
-        panelDisenoPresets.Controls.Add(btnElegirFondo);
-        panelDisenoPresets.Controls.Add(btnQuitarFondo);
-        panelDisenoPresets.Controls.Add(txtLayoutPerfilNombre);
-        panelDisenoPresets.Controls.Add(btnLayoutGuardarComo);
-        panelDisenoPresets.Controls.Add(btnLayoutEliminarPerfil);
+        panelDisenoPresets.Controls.Add(grpDisenoPerfiles);
+        panelDisenoPresets.Controls.Add(grpDisenoImagenes);
+        panelDisenoPresets.Controls.Add(grpDisenoArchivo);
         panelDisenoPresets.Dock = DockStyle.Top;
         panelDisenoPresets.Location = new Point(0, 0);
         panelDisenoPresets.Margin = new Padding(3, 4, 3, 4);
         panelDisenoPresets.Name = "panelDisenoPresets";
-        panelDisenoPresets.Size = new Size(797, 96);
+        panelDisenoPresets.Padding = new Padding(6, 4, 6, 4);
+        panelDisenoPresets.Size = new Size(974, 356);
         panelDisenoPresets.TabIndex = 1;
+        // 
+        // grpDisenoPerfiles
+        // 
+        grpDisenoPerfiles.Controls.Add(btnLayoutEliminarPerfil);
+        grpDisenoPerfiles.Controls.Add(btnLayoutGuardarComo);
+        grpDisenoPerfiles.Controls.Add(txtLayoutPerfilNombre);
+        grpDisenoPerfiles.Controls.Add(lblDisenoNuevoPerfil);
+        grpDisenoPerfiles.Controls.Add(cmbLayoutPerfiles);
+        grpDisenoPerfiles.Controls.Add(lblLayoutPerfil);
+        grpDisenoPerfiles.Dock = DockStyle.Top;
+        grpDisenoPerfiles.Location = new Point(6, 240);
+        grpDisenoPerfiles.Margin = new Padding(3, 4, 3, 8);
+        grpDisenoPerfiles.Name = "grpDisenoPerfiles";
+        grpDisenoPerfiles.Padding = new Padding(3, 4, 3, 4);
+        grpDisenoPerfiles.Size = new Size(962, 108);
+        grpDisenoPerfiles.TabIndex = 0;
+        grpDisenoPerfiles.TabStop = false;
+        grpDisenoPerfiles.Text = "Perfiles de diseño (en la base de datos)";
+        // 
+        // btnLayoutEliminarPerfil
+        // 
+        btnLayoutEliminarPerfil.Location = new Point(620, 64);
+        btnLayoutEliminarPerfil.Margin = new Padding(3, 4, 3, 4);
+        btnLayoutEliminarPerfil.Name = "btnLayoutEliminarPerfil";
+        btnLayoutEliminarPerfil.Size = new Size(180, 35);
+        btnLayoutEliminarPerfil.TabIndex = 5;
+        btnLayoutEliminarPerfil.Text = "Eliminar perfil seleccionado";
+        btnLayoutEliminarPerfil.Click += BtnLayoutEliminarPerfil_Click;
+        // 
+        // btnLayoutGuardarComo
+        // 
+        btnLayoutGuardarComo.Location = new Point(410, 64);
+        btnLayoutGuardarComo.Margin = new Padding(3, 4, 3, 4);
+        btnLayoutGuardarComo.Name = "btnLayoutGuardarComo";
+        btnLayoutGuardarComo.Size = new Size(200, 35);
+        btnLayoutGuardarComo.TabIndex = 4;
+        btnLayoutGuardarComo.Text = "Guardar diseño como perfil…";
+        btnLayoutGuardarComo.Click += BtnLayoutGuardarComo_Click;
+        // 
+        // txtLayoutPerfilNombre
+        // 
+        txtLayoutPerfilNombre.Location = new Point(180, 68);
+        txtLayoutPerfilNombre.Margin = new Padding(3, 4, 3, 4);
+        txtLayoutPerfilNombre.Name = "txtLayoutPerfilNombre";
+        txtLayoutPerfilNombre.PlaceholderText = "Ej. AMISTOSO";
+        txtLayoutPerfilNombre.Size = new Size(220, 27);
+        txtLayoutPerfilNombre.TabIndex = 3;
+        // 
+        // lblDisenoNuevoPerfil
+        // 
+        lblDisenoNuevoPerfil.AutoSize = true;
+        lblDisenoNuevoPerfil.Location = new Point(14, 72);
+        lblDisenoNuevoPerfil.Name = "lblDisenoNuevoPerfil";
+        lblDisenoNuevoPerfil.Size = new Size(150, 20);
+        lblDisenoNuevoPerfil.TabIndex = 2;
+        lblDisenoNuevoPerfil.Text = "Nombre nuevo perfil:";
+        // 
+        // cmbLayoutPerfiles
+        // 
+        cmbLayoutPerfiles.DropDownStyle = ComboBoxStyle.DropDownList;
+        cmbLayoutPerfiles.Location = new Point(130, 29);
+        cmbLayoutPerfiles.Margin = new Padding(3, 4, 3, 4);
+        cmbLayoutPerfiles.Name = "cmbLayoutPerfiles";
+        cmbLayoutPerfiles.Size = new Size(320, 28);
+        cmbLayoutPerfiles.TabIndex = 1;
+        cmbLayoutPerfiles.SelectedIndexChanged += CmbLayoutPerfiles_SelectedIndexChanged;
         // 
         // lblLayoutPerfil
         // 
         lblLayoutPerfil.AutoSize = true;
-        lblLayoutPerfil.Location = new Point(0, 15);
+        lblLayoutPerfil.Location = new Point(14, 33);
         lblLayoutPerfil.Name = "lblLayoutPerfil";
         lblLayoutPerfil.Size = new Size(89, 20);
         lblLayoutPerfil.TabIndex = 0;
         lblLayoutPerfil.Text = "Perfil activo:";
         // 
-        // cmbLayoutPerfiles
+        // grpDisenoImagenes
         // 
-        cmbLayoutPerfiles.DropDownStyle = ComboBoxStyle.DropDownList;
-        cmbLayoutPerfiles.Location = new Point(101, 9);
-        cmbLayoutPerfiles.Margin = new Padding(3, 4, 3, 4);
-        cmbLayoutPerfiles.Name = "cmbLayoutPerfiles";
-        cmbLayoutPerfiles.Size = new Size(228, 28);
-        cmbLayoutPerfiles.TabIndex = 1;
-        cmbLayoutPerfiles.SelectedIndexChanged += CmbLayoutPerfiles_SelectedIndexChanged;
-        // 
-        // btnElegirFondo
-        // 
-        btnElegirFondo.Location = new Point(335, 8);
-        btnElegirFondo.Margin = new Padding(3, 4, 3, 4);
-        btnElegirFondo.Name = "btnElegirFondo";
-        btnElegirFondo.Size = new Size(120, 35);
-        btnElegirFondo.TabIndex = 2;
-        btnElegirFondo.Text = "Elegir fondo...";
-        btnElegirFondo.Click += BtnElegirFondo_Click;
-        // 
-        // btnQuitarFondo
-        // 
-        btnQuitarFondo.Location = new Point(461, 8);
-        btnQuitarFondo.Margin = new Padding(3, 4, 3, 4);
-        btnQuitarFondo.Name = "btnQuitarFondo";
-        btnQuitarFondo.Size = new Size(115, 35);
-        btnQuitarFondo.TabIndex = 3;
-        btnQuitarFondo.Text = "Quitar fondo";
-        btnQuitarFondo.Click += BtnQuitarFondo_Click;
-        // 
-        // btnElegirImagenGolIntermedia
-        // 
-        btnElegirImagenGolIntermedia.Location = new Point(582, 8);
-        btnElegirImagenGolIntermedia.Margin = new Padding(3, 4, 3, 4);
-        btnElegirImagenGolIntermedia.Name = "btnElegirImagenGolIntermedia";
-        btnElegirImagenGolIntermedia.Size = new Size(200, 35);
-        btnElegirImagenGolIntermedia.TabIndex = 7;
-        btnElegirImagenGolIntermedia.Text = "Imagen intermedia ¡GOL!…";
-        btnElegirImagenGolIntermedia.Click += BtnElegirImagenGolIntermedia_Click;
+        grpDisenoImagenes.Controls.Add(btnQuitarImagenGolIntermedia);
+        grpDisenoImagenes.Controls.Add(btnElegirImagenGolIntermedia);
+        grpDisenoImagenes.Controls.Add(lblDisenoSplashGol);
+        grpDisenoImagenes.Controls.Add(btnQuitarFondo);
+        grpDisenoImagenes.Controls.Add(btnElegirFondo);
+        grpDisenoImagenes.Controls.Add(lblDisenoFondo);
+        grpDisenoImagenes.Dock = DockStyle.Top;
+        grpDisenoImagenes.Location = new Point(6, 122);
+        grpDisenoImagenes.Margin = new Padding(3, 4, 3, 8);
+        grpDisenoImagenes.Name = "grpDisenoImagenes";
+        grpDisenoImagenes.Padding = new Padding(3, 4, 3, 4);
+        grpDisenoImagenes.Size = new Size(962, 118);
+        grpDisenoImagenes.TabIndex = 1;
+        grpDisenoImagenes.TabStop = false;
+        grpDisenoImagenes.Text = "Imágenes del marcador (fondo y celebración de gol)";
         // 
         // btnQuitarImagenGolIntermedia
         // 
-        btnQuitarImagenGolIntermedia.Location = new Point(493, 51);
+        btnQuitarImagenGolIntermedia.Location = new Point(588, 72);
         btnQuitarImagenGolIntermedia.Margin = new Padding(3, 4, 3, 4);
         btnQuitarImagenGolIntermedia.Name = "btnQuitarImagenGolIntermedia";
         btnQuitarImagenGolIntermedia.Size = new Size(200, 35);
-        btnQuitarImagenGolIntermedia.TabIndex = 8;
-        btnQuitarImagenGolIntermedia.Text = "Quitar imagen ¡GOL!";
+        btnQuitarImagenGolIntermedia.TabIndex = 5;
+        btnQuitarImagenGolIntermedia.Text = "Quitar imagen «¡GOL!»";
         btnQuitarImagenGolIntermedia.Click += BtnQuitarImagenGolIntermedia_Click;
         // 
-        // txtLayoutPerfilNombre
+        // btnElegirImagenGolIntermedia
         // 
-        txtLayoutPerfilNombre.Location = new Point(0, 53);
-        txtLayoutPerfilNombre.Margin = new Padding(3, 4, 3, 4);
-        txtLayoutPerfilNombre.Name = "txtLayoutPerfilNombre";
-        txtLayoutPerfilNombre.PlaceholderText = "Nombre nuevo perfil";
-        txtLayoutPerfilNombre.Size = new Size(182, 27);
-        txtLayoutPerfilNombre.TabIndex = 4;
+        btnElegirImagenGolIntermedia.Location = new Point(380, 72);
+        btnElegirImagenGolIntermedia.Margin = new Padding(3, 4, 3, 4);
+        btnElegirImagenGolIntermedia.Name = "btnElegirImagenGolIntermedia";
+        btnElegirImagenGolIntermedia.Size = new Size(200, 35);
+        btnElegirImagenGolIntermedia.TabIndex = 4;
+        btnElegirImagenGolIntermedia.Text = "Elegir imagen «¡GOL!»…";
+        btnElegirImagenGolIntermedia.Click += BtnElegirImagenGolIntermedia_Click;
         // 
-        // btnLayoutGuardarComo
+        // lblDisenoSplashGol
         // 
-        btnLayoutGuardarComo.Location = new Point(192, 51);
-        btnLayoutGuardarComo.Margin = new Padding(3, 4, 3, 4);
-        btnLayoutGuardarComo.Name = "btnLayoutGuardarComo";
-        btnLayoutGuardarComo.Size = new Size(149, 35);
-        btnLayoutGuardarComo.TabIndex = 5;
-        btnLayoutGuardarComo.Text = "Guardar como…";
-        btnLayoutGuardarComo.Click += BtnLayoutGuardarComo_Click;
+        lblDisenoSplashGol.AutoSize = true;
+        lblDisenoSplashGol.Location = new Point(14, 78);
+        lblDisenoSplashGol.Name = "lblDisenoSplashGol";
+        lblDisenoSplashGol.Size = new Size(364, 20);
+        lblDisenoSplashGol.TabIndex = 3;
+        lblDisenoSplashGol.Text = "Imagen a pantalla completa antes del detalle del gol:";
         // 
-        // btnLayoutEliminarPerfil
+        // btnQuitarFondo
         // 
-        btnLayoutEliminarPerfil.Location = new Point(350, 51);
-        btnLayoutEliminarPerfil.Margin = new Padding(3, 4, 3, 4);
-        btnLayoutEliminarPerfil.Name = "btnLayoutEliminarPerfil";
-        btnLayoutEliminarPerfil.Size = new Size(137, 35);
-        btnLayoutEliminarPerfil.TabIndex = 6;
-        btnLayoutEliminarPerfil.Text = "Eliminar perfil";
-        btnLayoutEliminarPerfil.Click += BtnLayoutEliminarPerfil_Click;
+        btnQuitarFondo.Location = new Point(588, 30);
+        btnQuitarFondo.Margin = new Padding(3, 4, 3, 4);
+        btnQuitarFondo.Name = "btnQuitarFondo";
+        btnQuitarFondo.Size = new Size(200, 35);
+        btnQuitarFondo.TabIndex = 2;
+        btnQuitarFondo.Text = "Quitar imagen de fondo";
+        btnQuitarFondo.Click += BtnQuitarFondo_Click;
+        // 
+        // btnElegirFondo
+        // 
+        btnElegirFondo.Location = new Point(380, 30);
+        btnElegirFondo.Margin = new Padding(3, 4, 3, 4);
+        btnElegirFondo.Name = "btnElegirFondo";
+        btnElegirFondo.Size = new Size(200, 35);
+        btnElegirFondo.TabIndex = 1;
+        btnElegirFondo.Text = "Elegir imagen de fondo…";
+        btnElegirFondo.Click += BtnElegirFondo_Click;
+        // 
+        // lblDisenoFondo
+        // 
+        lblDisenoFondo.AutoSize = true;
+        lblDisenoFondo.Location = new Point(14, 36);
+        lblDisenoFondo.Name = "lblDisenoFondo";
+        lblDisenoFondo.Size = new Size(315, 20);
+        lblDisenoFondo.TabIndex = 0;
+        lblDisenoFondo.Text = "Imagen de fondo (detrás de textos y escudos):";
+        // 
+        // grpDisenoArchivo
+        // 
+        grpDisenoArchivo.Controls.Add(btnLayoutImportarArchivo);
+        grpDisenoArchivo.Controls.Add(btnLayoutExportarArchivo);
+        grpDisenoArchivo.Controls.Add(lblDisenoArchivoAyuda);
+        grpDisenoArchivo.Dock = DockStyle.Top;
+        grpDisenoArchivo.Location = new Point(6, 4);
+        grpDisenoArchivo.Margin = new Padding(3, 4, 3, 4);
+        grpDisenoArchivo.Name = "grpDisenoArchivo";
+        grpDisenoArchivo.Padding = new Padding(3, 4, 3, 4);
+        grpDisenoArchivo.Size = new Size(962, 118);
+        grpDisenoArchivo.TabIndex = 2;
+        grpDisenoArchivo.TabStop = false;
+        grpDisenoArchivo.Text = "Copia del diseño en archivo (JSON)";
+        // 
+        // btnLayoutImportarArchivo
+        // 
+        btnLayoutImportarArchivo.Location = new Point(264, 74);
+        btnLayoutImportarArchivo.Margin = new Padding(3, 4, 3, 4);
+        btnLayoutImportarArchivo.Name = "btnLayoutImportarArchivo";
+        btnLayoutImportarArchivo.Size = new Size(240, 35);
+        btnLayoutImportarArchivo.TabIndex = 2;
+        btnLayoutImportarArchivo.Text = "Importar diseño desde archivo…";
+        btnLayoutImportarArchivo.Click += BtnLayoutImportarArchivo_Click;
+        // 
+        // btnLayoutExportarArchivo
+        // 
+        btnLayoutExportarArchivo.Location = new Point(14, 74);
+        btnLayoutExportarArchivo.Margin = new Padding(3, 4, 3, 4);
+        btnLayoutExportarArchivo.Name = "btnLayoutExportarArchivo";
+        btnLayoutExportarArchivo.Size = new Size(240, 35);
+        btnLayoutExportarArchivo.TabIndex = 1;
+        btnLayoutExportarArchivo.Text = "Exportar diseño a archivo…";
+        btnLayoutExportarArchivo.Click += BtnLayoutExportarArchivo_Click;
+        // 
+        // lblDisenoArchivoAyuda
+        // 
+        lblDisenoArchivoAyuda.Location = new Point(14, 28);
+        lblDisenoArchivoAyuda.Name = "lblDisenoArchivoAyuda";
+        lblDisenoArchivoAyuda.Size = new Size(930, 44);
+        lblDisenoArchivoAyuda.TabIndex = 0;
+        lblDisenoArchivoAyuda.Text = "Exporte el diseño actual a un archivo para respaldo o para copiarlo a otro PC. Tras importar, use «Guardar diseño» abajo para guardarlo en la base de datos y enviarlo al marcador.";
         // 
         // panelDisenoBotones
         // 
@@ -870,7 +1059,7 @@ partial class Form1
         panelDisenoBotones.Location = new Point(0, 1113);
         panelDisenoBotones.Margin = new Padding(3, 4, 3, 4);
         panelDisenoBotones.Name = "panelDisenoBotones";
-        panelDisenoBotones.Size = new Size(797, 59);
+        panelDisenoBotones.Size = new Size(974, 59);
         panelDisenoBotones.TabIndex = 2;
         // 
         // btnLayoutPredeterminado
@@ -897,10 +1086,10 @@ partial class Form1
         // 
         AutoScaleDimensions = new SizeF(8F, 20F);
         AutoScaleMode = AutoScaleMode.Font;
-        ClientSize = new Size(823, 1227);
+        ClientSize = new Size(1000, 1227);
         Controls.Add(tabPrincipal);
         Margin = new Padding(3, 4, 3, 4);
-        MinimumSize = new Size(729, 918);
+        MinimumSize = new Size(880, 918);
         Name = "Form1";
         StartPosition = FormStartPosition.CenterScreen;
         Text = "Marcador LBG - Administrador";
@@ -912,6 +1101,8 @@ partial class Form1
         grpEquipos.PerformLayout();
         grpManual.ResumeLayout(false);
         grpManual.PerformLayout();
+        ((System.ComponentModel.ISupportInitialize)picPreviewLogoVisitante).EndInit();
+        ((System.ComponentModel.ISupportInitialize)picPreviewLogoLocal).EndInit();
         grpCronometro.ResumeLayout(false);
         grpCronometro.PerformLayout();
         grpGoles.ResumeLayout(false);
@@ -920,13 +1111,17 @@ partial class Form1
         grpCabecera.ResumeLayout(false);
         grpCabecera.PerformLayout();
         tabPageDiseno.ResumeLayout(false);
+        panelDisenoHost.ResumeLayout(false);
         splitContainerDiseno.Panel1.ResumeLayout(false);
         splitContainerDiseno.Panel2.ResumeLayout(false);
         ((System.ComponentModel.ISupportInitialize)splitContainerDiseno).EndInit();
         splitContainerDiseno.ResumeLayout(false);
-        panelDisenoHost.ResumeLayout(false);
         panelDisenoPresets.ResumeLayout(false);
-        panelDisenoPresets.PerformLayout();
+        grpDisenoPerfiles.ResumeLayout(false);
+        grpDisenoPerfiles.PerformLayout();
+        grpDisenoImagenes.ResumeLayout(false);
+        grpDisenoImagenes.PerformLayout();
+        grpDisenoArchivo.ResumeLayout(false);
         panelDisenoBotones.ResumeLayout(false);
         ResumeLayout(false);
     }
@@ -941,15 +1136,24 @@ partial class Form1
     private SplitContainer splitContainerDiseno;
     private DisplayDesignerControl displayDesignerControl;
     private Panel panelDisenoPresets;
+    private GroupBox grpDisenoPerfiles;
+    private GroupBox grpDisenoImagenes;
+    private GroupBox grpDisenoArchivo;
     private Label lblLayoutPerfil;
+    private Label lblDisenoNuevoPerfil;
     private ComboBox cmbLayoutPerfiles;
-    private Button btnElegirFondo;
-    private Button btnQuitarFondo;
-    private Button btnElegirImagenGolIntermedia;
-    private Button btnQuitarImagenGolIntermedia;
     private TextBox txtLayoutPerfilNombre;
     private Button btnLayoutGuardarComo;
     private Button btnLayoutEliminarPerfil;
+    private Label lblDisenoFondo;
+    private Button btnElegirFondo;
+    private Button btnQuitarFondo;
+    private Label lblDisenoSplashGol;
+    private Button btnElegirImagenGolIntermedia;
+    private Button btnQuitarImagenGolIntermedia;
+    private Label lblDisenoArchivoAyuda;
+    private Button btnLayoutExportarArchivo;
+    private Button btnLayoutImportarArchivo;
     private Panel panelDisenoBotones;
     private GroupBox grpCabecera;
     private Label lblTituloLiga;
@@ -999,9 +1203,15 @@ partial class Form1
     private Button btnGuardarLayoutMarcador;
     private Button btnLayoutPredeterminado;
     private GroupBox grpManual;
+    private PictureBox picPreviewLogoLocal;
+    private PictureBox picPreviewLogoVisitante;
     private TextBox txtNombreVisitante;
     private TextBox txtNombreLocal;
     private Button btnLogoVisitante;
     private Button btnLogoLocal;
     private Button btnAplicarManual;
+    private Label lblTextoGolManualLocal;
+    private TextBox txtTextoGolManualLocal;
+    private Label lblTextoGolManualVisitante;
+    private TextBox txtTextoGolManualVisitante;
 }

@@ -35,7 +35,9 @@ public sealed class MarcadorLayoutSnapshot
     [Category("Título liga")] public int TituloLiga_H { get; set; } = 29;
     [Category("Título liga")] public float TituloLiga_FontPt { get; set; } = 11f;
     [Category("Título liga")] public bool TituloLiga_Bold { get; set; } = true;
-    [Category("Título liga")] public string TituloLiga_FontFamily { get; set; } = "Microsoft Sans Serif";
+    [Category("Título liga")]
+    [TypeConverter(typeof(SystemFontFamilyNameConverter))]
+    public string TituloLiga_FontFamily { get; set; } = "Microsoft Sans Serif";
     [Category("Título liga")]
     [Description("Color de texto")]
     public Color TituloLiga_Color { get; set; } = Color.White;
@@ -47,7 +49,9 @@ public sealed class MarcadorLayoutSnapshot
     [Category("Etapa (marquee)")] public int Etapa_H { get; set; } = 23;
     [Category("Etapa (marquee)")] public float Etapa_FontPt { get; set; } = 11f;
     [Category("Etapa (marquee)")] public bool Etapa_Bold { get; set; } = true;
-    [Category("Etapa (marquee)")] public string Etapa_FontFamily { get; set; } = "Comic Sans MS";
+    [Category("Etapa (marquee)")]
+    [TypeConverter(typeof(SystemFontFamilyNameConverter))]
+    public string Etapa_FontFamily { get; set; } = "Comic Sans MS";
     [Category("Etapa (marquee)")] public Color Etapa_Color { get; set; } = Color.White;
 
     [Category("Periodo (junto al tiempo, izquierda)")]
@@ -59,7 +63,9 @@ public sealed class MarcadorLayoutSnapshot
     [Category("Periodo (junto al tiempo, izquierda)")] public int Periodo_H { get; set; } = 24;
     [Category("Periodo (junto al tiempo, izquierda)")] public float Periodo_FontPt { get; set; } = 9.75f;
     [Category("Periodo (junto al tiempo, izquierda)")] public bool Periodo_Bold { get; set; } = true;
-    [Category("Periodo (junto al tiempo, izquierda)")] public string Periodo_FontFamily { get; set; } = "Microsoft Sans Serif";
+    [Category("Periodo (junto al tiempo, izquierda)")]
+    [TypeConverter(typeof(SystemFontFamilyNameConverter))]
+    public string Periodo_FontFamily { get; set; } = "Microsoft Sans Serif";
     [Category("Periodo (junto al tiempo, izquierda)")] public Color Periodo_Color { get; set; } = Color.FromArgb(240, 240, 240);
 
     [Category("Cronómetro (tiempo)")]
@@ -71,7 +77,9 @@ public sealed class MarcadorLayoutSnapshot
     [Category("Cronómetro (tiempo)")] public int Cronometro_H { get; set; } = 24;
     [Category("Cronómetro (tiempo)")] public float Cronometro_FontPt { get; set; } = 16f;
     [Category("Cronómetro (tiempo)")] public bool Cronometro_Bold { get; set; } = true;
-    [Category("Cronómetro (tiempo)")] public string Cronometro_FontFamily { get; set; } = "Microsoft Sans Serif";
+    [Category("Cronómetro (tiempo)")]
+    [TypeConverter(typeof(SystemFontFamilyNameConverter))]
+    public string Cronometro_FontFamily { get; set; } = "Microsoft Sans Serif";
     [Category("Cronómetro (tiempo)")] public Color Cronometro_Color { get; set; } = Color.FromArgb(224, 224, 224);
 
     [Category("Celebración de gol (pantalla completa)")]
@@ -131,7 +139,9 @@ public sealed class MarcadorLayoutSnapshot
     [Category("Nombre equipo local")] public int NombreLocal_H { get; set; } = 16;
     [Category("Nombre equipo local")] public float NombreLocal_FontPt { get; set; } = 8.25f;
     [Category("Nombre equipo local")] public bool NombreLocal_Bold { get; set; } = true;
-    [Category("Nombre equipo local")] public string NombreLocal_FontFamily { get; set; } = "Microsoft Sans Serif";
+    [Category("Nombre equipo local")]
+    [TypeConverter(typeof(SystemFontFamilyNameConverter))]
+    public string NombreLocal_FontFamily { get; set; } = "Microsoft Sans Serif";
     [Category("Nombre equipo local")] public Color NombreLocal_Color { get; set; } = Color.White;
 
     [Category("Nombre equipo visitante")]
@@ -142,7 +152,9 @@ public sealed class MarcadorLayoutSnapshot
     [Category("Nombre equipo visitante")] public int NombreVisitante_H { get; set; } = 16;
     [Category("Nombre equipo visitante")] public float NombreVisitante_FontPt { get; set; } = 8.25f;
     [Category("Nombre equipo visitante")] public bool NombreVisitante_Bold { get; set; } = true;
-    [Category("Nombre equipo visitante")] public string NombreVisitante_FontFamily { get; set; } = "Microsoft Sans Serif";
+    [Category("Nombre equipo visitante")]
+    [TypeConverter(typeof(SystemFontFamilyNameConverter))]
+    public string NombreVisitante_FontFamily { get; set; } = "Microsoft Sans Serif";
     [Category("Nombre equipo visitante")] public Color NombreVisitante_Color { get; set; } = Color.White;
 
     [Category("Goles local")]
@@ -152,7 +164,9 @@ public sealed class MarcadorLayoutSnapshot
     [Category("Goles local")] public int GolLocal_H { get; set; } = 46;
     [Category("Goles local")] public float GolLocal_FontPt { get; set; } = 22f;
     [Category("Goles local")] public bool GolLocal_Bold { get; set; } = true;
-    [Category("Goles local")] public string GolLocal_FontFamily { get; set; } = "Microsoft Sans Serif";
+    [Category("Goles local")]
+    [TypeConverter(typeof(SystemFontFamilyNameConverter))]
+    public string GolLocal_FontFamily { get; set; } = "Microsoft Sans Serif";
     [Category("Goles local")] public Color GolLocal_Color { get; set; } = Color.White;
 
     [Category("Goles visitante")]
@@ -162,7 +176,9 @@ public sealed class MarcadorLayoutSnapshot
     [Category("Goles visitante")] public int GolVisitante_H { get; set; } = 46;
     [Category("Goles visitante")] public float GolVisitante_FontPt { get; set; } = 22f;
     [Category("Goles visitante")] public bool GolVisitante_Bold { get; set; } = true;
-    [Category("Goles visitante")] public string GolVisitante_FontFamily { get; set; } = "Microsoft Sans Serif";
+    [Category("Goles visitante")]
+    [TypeConverter(typeof(SystemFontFamilyNameConverter))]
+    public string GolVisitante_FontFamily { get; set; } = "Microsoft Sans Serif";
     [Category("Goles visitante")] public Color GolVisitante_Color { get; set; } = Color.White;
 
     public static MarcadorLayoutSnapshot CreateDefault() => new();

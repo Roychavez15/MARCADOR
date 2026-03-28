@@ -216,8 +216,7 @@ public class DisplayDesignerControl : UserControl
                 return new Bitmap(img);
             }
             if (!File.Exists(path)) return null;
-            using var orig = Image.FromFile(path);
-            return (Image)orig.Clone();
+            return ImagenArchivoSinBloqueo.CrearDesdeArchivo(path);
         }
         catch { return null; }
     }

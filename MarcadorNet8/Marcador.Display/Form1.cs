@@ -25,6 +25,8 @@ public partial class Form1 : Form
     private int _celebracionGeomJw = -1, _celebracionGeomJh = -1;
     private int _celebracionGeomMw = -1, _celebracionGeomMh = -1;
     private int _celebracionLayoutModo; // 1 = detalle jugador, 2 = manual
+    private bool _celebracionManualHayExtra;
+    private bool _celebracionManualSoloTexto;
 
     public Form1()
     {
@@ -105,37 +107,81 @@ public partial class Form1 : Form
         Place(lblGolCampValor, 172, 202, 76, 22);
     }
 
-    /// <summary>Celebración manual (escudo + nombre) con la misma escala que el área cliente del Display.</summary>
-    private void AplicarGeometriaCelebracionDetalleManual(int cw, int ch, bool forzar = false)
+    /// <summary>Celebración manual: escudo (~15 px del borde superior), nombre de equipo más grande, texto opcional debajo (tamaño moderado), todo centrado.</summary>
+    private void AplicarGeometriaCelebracionDetalleManual(int cw, int ch, bool forzar = false, bool hayTextoExtra = false, bool soloTextoSinEquipo = false)
     {
         cw = Math.Max(64, cw);
         ch = Math.Max(64, ch);
-        if (!forzar && _celebracionLayoutModo == 2 && cw == _celebracionGeomMw && ch == _celebracionGeomMh)
+        if (!forzar && _celebracionLayoutModo == 2 && cw == _celebracionGeomMw && ch == _celebracionGeomMh
+            && hayTextoExtra == _celebracionManualHayExtra && soloTextoSinEquipo == _celebracionManualSoloTexto)
             return;
         _celebracionLayoutModo = 2;
         _celebracionGeomMw = cw;
         _celebracionGeomMh = ch;
+        _celebracionManualHayExtra = hayTextoExtra;
+        _celebracionManualSoloTexto = soloTextoSinEquipo;
+
         var sx = cw / (float)CelebracionRefW;
         var sy = ch / (float)CelebracionRefH;
         var fs = Math.Min(sx, sy);
         int S(float v) => Math.Max(1, (int)Math.Round(v));
 
-        var logoW = S(89 * sx);
-        var logoH = S(70 * sy);
+        var pad = S(8 * sx);
+        var topPad = S(15 * sy);
+
+        var logoW = S(118 * sx);
+        var logoH = S(90 * sy);
         picGolEscudo.SizeMode = PictureBoxSizeMode.Zoom;
         picGolEscudo.Size = new Size(logoW, logoH);
-        picGolEscudo.Location = new Point((cw - logoW) / 2, S(60 * sy));
+        picGolEscudo.Location = new Point((cw - logoW) / 2, topPad);
 
-        AsignarFuente(lblGolNombre, new Font("Segoe UI", 16f * fs, FontStyle.Bold, GraphicsUnit.Point));
+        var gapNom = S(10 * Math.Min(sx, sy));
+
         lblGolNombre.ForeColor = Color.White;
         lblGolNombre.AutoSize = false;
         lblGolNombre.AutoEllipsis = true;
-        lblGolNombre.TextAlign = ContentAlignment.TopCenter;
-        var pad = S(8 * sx);
-        var gap = S(12 * Math.Min(sx, sy));
-        var topNom = picGolEscudo.Bottom + gap;
-        lblGolNombre.Location = new Point(pad, topNom);
-        lblGolNombre.Size = new Size(Math.Max(40, cw - 2 * pad), Math.Max(S(48 * sy), ch - topNom - pad));
+        lblGolNombre.TextAlign = ContentAlignment.MiddleCenter;
+
+        lblGolManualExtra.ForeColor = Color.White;
+        lblGolManualExtra.AutoSize = false;
+        lblGolManualExtra.AutoEllipsis = true;
+        lblGolManualExtra.TextAlign = ContentAlignment.TopCenter;
+
+        if (soloTextoSinEquipo)
+        {
+            lblGolNombre.Location = new Point(0, 0);
+            lblGolNombre.Size = new Size(0, 0);
+            var topTxt = picGolEscudo.Bottom + gapNom;
+            AsignarFuente(lblGolManualExtra, new Font("Segoe UI", 14f * fs, FontStyle.Regular, GraphicsUnit.Point));
+            lblGolManualExtra.TextAlign = ContentAlignment.MiddleCenter;
+            lblGolManualExtra.Location = new Point(pad, topTxt);
+            lblGolManualExtra.Size = new Size(Math.Max(40, cw - 2 * pad), Math.Max(S(32 * sy), ch - topTxt - pad));
+            return;
+        }
+
+        AsignarFuente(lblGolNombre, new Font("Segoe UI", 20f * fs, FontStyle.Bold, GraphicsUnit.Point));
+
+        var topNom = picGolEscudo.Bottom + gapNom;
+        var nomH = S(46 * sy);
+
+        if (hayTextoExtra)
+        {
+            lblGolManualExtra.TextAlign = ContentAlignment.TopCenter;
+            AsignarFuente(lblGolManualExtra, new Font("Segoe UI", 14f * fs, FontStyle.Regular, GraphicsUnit.Point));
+            var gapExtra = S(7 * Math.Min(sx, sy));
+            lblGolNombre.Location = new Point(pad, topNom);
+            lblGolNombre.Size = new Size(cw - 2 * pad, nomH);
+            var topExtra = lblGolNombre.Bottom + gapExtra;
+            lblGolManualExtra.Location = new Point(pad, topExtra);
+            lblGolManualExtra.Size = new Size(Math.Max(40, cw - 2 * pad), Math.Max(S(32 * sy), ch - topExtra - pad));
+        }
+        else
+        {
+            lblGolNombre.Location = new Point(pad, topNom);
+            lblGolNombre.Size = new Size(Math.Max(40, cw - 2 * pad), Math.Max(nomH, ch - topNom - pad));
+            lblGolManualExtra.Location = new Point(0, ch);
+            lblGolManualExtra.Size = new Size(0, 0);
+        }
     }
 
     protected override void OnLoad(EventArgs e)
@@ -443,6 +489,7 @@ public partial class Form1 : Form
 
         AplicarFondo(lay);
 
+        lblGolManualExtra.Visible = false;
         AplicarGeometriaCelebracionDetalleJugador(w, h, forzar: true);
         _celebracionManualCacheKey = null;
     }
@@ -494,7 +541,7 @@ public partial class Form1 : Form
                 return Image.FromStream(ms);
             }
             if (File.Exists(pathOrUrl))
-                return Image.FromFile(pathOrUrl);
+                return ImagenArchivoSinBloqueo.CrearDesdeArchivo(pathOrUrl);
         }
         catch { }
         return null;
@@ -577,7 +624,7 @@ public partial class Form1 : Form
         var manual = c.EsManual == 1;
         if (manual)
         {
-            var key = $"manual|{c.Nombres ?? ""}|{c.EscudoUrl ?? ""}";
+            var key = $"manual|{c.Nombres ?? ""}|{c.EscudoUrl ?? ""}|{c.Identificacion ?? ""}";
             if (key != _celebracionManualCacheKey)
             {
                 _celebracionManualCacheKey = key;
@@ -626,6 +673,7 @@ public partial class Form1 : Form
         yield return picGolFoto;
         yield return picGolEscudo;
         yield return lblGolNombre;
+        yield return lblGolManualExtra;
         yield return lblGolNumero;
         yield return lblGolEtiquetaPartido;
         yield return lblGolEtiquetaCamp;
@@ -638,6 +686,7 @@ public partial class Form1 : Form
         pnlCelebracion.SuspendLayout();
         foreach (var ctl in ControlesDetalleCelebracion())
             ctl.Visible = true;
+        lblGolManualExtra.Visible = false;
         RestaurarLayoutCelebracionJugadorPorDefecto();
 
         lblGolNombre.Text = FormatearNombreParaCelebracionJugador(c.Nombres);
@@ -656,18 +705,32 @@ public partial class Form1 : Form
         foreach (var ctl in ControlesDetalleCelebracion())
             ctl.Visible = false;
         picGolEscudo.Visible = true;
-        lblGolNombre.Visible = true;
+
+        var nomEq = (c.Nombres ?? "").Trim();
+        var extra = (c.Identificacion ?? "").Trim();
+        var hayExtra = extra.Length > 0;
+        var soloExtra = hayExtra && string.IsNullOrEmpty(nomEq);
+
+        lblGolNombre.Visible = !soloExtra;
+        lblGolNombre.Text = TextoCelebracionManualMayusculas(nomEq);
+        lblGolManualExtra.Visible = hayExtra;
+        lblGolManualExtra.Text = hayExtra ? TextoCelebracionManualMayusculas(extra) : "";
 
         var w = Math.Max(64, pnlCelebracion.ClientSize.Width);
         var h = Math.Max(64, pnlCelebracion.ClientSize.Height);
-        AplicarGeometriaCelebracionDetalleManual(w, h, forzar: true);
-
-        lblGolNombre.Text = c.Nombres ?? "";
+        AplicarGeometriaCelebracionDetalleManual(w, h, forzar: true, hayTextoExtra: hayExtra, soloTextoSinEquipo: soloExtra);
 
         CargarLogo(picGolEscudo, c.EscudoUrl);
         picGolFoto.Image?.Dispose();
         picGolFoto.Image = null;
         pnlCelebracion.ResumeLayout(false);
+    }
+
+    /// <summary>Mayúsculas para textos de celebración manual (respeta cultura del sistema, p. ej. Ñ).</summary>
+    private static string TextoCelebracionManualMayusculas(string? texto)
+    {
+        var s = (texto ?? "").Trim();
+        return s.Length == 0 ? s : s.ToUpper(CultureInfo.CurrentCulture);
     }
 
     /// <summary>
@@ -724,7 +787,7 @@ public partial class Form1 : Form
             }
             else if (File.Exists(origen))
             {
-                raw = Image.FromFile(origen);
+                raw = ImagenArchivoSinBloqueo.CrearDesdeArchivo(origen);
             }
 
             if (raw == null)
@@ -856,8 +919,9 @@ public partial class Form1 : Form
             }
             else if (File.Exists(origen))
             {
+                var img = ImagenArchivoSinBloqueo.CrearDesdeArchivo(origen);
                 pic.Image?.Dispose();
-                pic.Image = Image.FromFile(origen);
+                pic.Image = img;
             }
         }
         catch
